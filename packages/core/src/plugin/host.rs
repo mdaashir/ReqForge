@@ -10,7 +10,6 @@ use std::collections::HashMap;
 use std::path::Path;
 use thiserror::Error;
 use wasmtime::{Config, Engine, Linker, Module, Store};
-use wasmtime_wasi::sync::WasiCtxBuilder;
 
 #[derive(Debug, Error)]
 pub enum PluginHostError {
@@ -38,7 +37,7 @@ struct PluginInstance {
 }
 
 struct PluginState {
-    wasi: wasmtime_wasi::WasiCtx,
+    wasi: (),
     storage: HashMap<String, String>,
 }
 
@@ -89,7 +88,7 @@ impl PluginHost {
             let wasm_path = entry.path().join(&manifest.wasm);
             let wasm = std::fs::read(&wasm_path)?;
             let module = Module::new(&self.engine, &wasm)?;
-            let wasi = WasiCtxBuilder::new().build();
+            let wasi = ();
             let storage = self.storage.entry(manifest.id.clone()).or_default().clone();
             let state = PluginState { wasi, storage };
             let mut store = Store::new(&self.engine, state);

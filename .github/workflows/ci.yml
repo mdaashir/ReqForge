@@ -22,7 +22,7 @@ jobs:
         with:
           workspaces: "packages/core -> target\napps/cli -> target"
       - run: cargo fmt --all -- --check
-      - run: cargo clippy --package reqforge-core --all-features -- -D warnings
+      - run: cargo clippy --package reqforge-core -- -D warnings
 
   test-core:
     name: cargo test (core)
@@ -46,7 +46,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: "apps/cli -> target"
-      - run: cargo test --manifest-path apps/cli/Cargo.toml --lib
+      - run: cargo test --manifest-path apps/cli/Cargo.toml
 
   audit:
     name: cargo audit

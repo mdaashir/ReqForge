@@ -6,7 +6,7 @@
 use crate::OutputFormat;
 use anyhow::{Context, Result};
 use reqforge_core::collection::{CollectionRunner, CollectionStorage, RunMode};
-use reqforge_core::request::executor::RequestExecutor;
+use reqforge_core::request::RequestExecutor;
 use reqforge_core::testing::reporter::{write_report, ReportFormat};
 use std::path::Path;
 
