@@ -3,13 +3,11 @@
 //! Implements unary gRPC-Web calls over HTTP/1.1 by wrapping the HTTP handler.
 //! No streaming support.
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::protocol::{ProtocolCapabilities, ProtocolHandler};
 use crate::protocol::http::HttpHandler;
-use crate::request::{Body, BodyMode, KeyValue, Request, Response, ResponseBody, ResponseSize, ResponseTiming};
+use crate::request::{Request, Response, ResponseBody};
 use async_trait::async_trait;
-use serde::{Deserialize, Serialize};
-use std::time::{Instant, SystemTime};
 
 pub struct Backend;
 
@@ -34,7 +32,7 @@ impl Backend {
     /// Invoke a unary gRPC call via gRPC-Web JSON.
     pub async fn invoke_unary(&self, mut request: Request) -> Result<Response> {
         // Identify the method from headers or URL path
-        let method_path = request
+        let _method_path = request
             .headers
             .iter()
             .find(|h| h.key.eq_ignore_ascii_case("grpc-method"))

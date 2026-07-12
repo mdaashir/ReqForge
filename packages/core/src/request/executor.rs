@@ -5,7 +5,7 @@ use crate::request::{AuthType, HttpMethod, Request, Response, ResponseBody, Resp
 use crate::scripting;
 use reqwest::Client;
 use std::collections::HashMap;
-use std::time::{Instant, SystemTime};
+use std::time::Instant;
 
 /// Request executor that handles sending HTTP requests.
 ///
@@ -29,7 +29,7 @@ impl RequestExecutor {
     /// Execute a request with the given variable resolver
     pub async fn execute_with_resolver(
         &self,
-        mut request: Request,
+        request: Request,
         resolver: &VariableResolver,
     ) -> Result<Response> {
         // 1. Resolve variables in URL, headers, params, body
@@ -304,8 +304,6 @@ impl RequestExecutor {
             body: body_size,
             total: headers_size + body_size,
         };
-
-        let _ = SystemTime::now(); // suppress unused warning
 
         Ok(Response {
             status: status_code,

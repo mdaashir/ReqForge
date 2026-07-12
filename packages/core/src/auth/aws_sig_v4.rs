@@ -304,8 +304,8 @@ fn derive_signing_key(secret_key: &str, date_stamp: &str, region: &str, service:
     let k_date = sign_str(&k_secret, date_stamp);
     let k_region = sign(&k_date, region.as_bytes());
     let k_service = sign(&k_region, service.as_bytes());
-    let k_signing = sign(&k_service, b"aws4_request");
-    k_signing
+    
+    sign(&k_service, b"aws4_request")
 }
 
 fn sign(key: &[u8], data: &[u8]) -> Vec<u8> {

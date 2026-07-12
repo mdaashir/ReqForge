@@ -12,15 +12,12 @@
 //! - **WS-Addressing** — optional `wsa:Action`, `wsa:To`, `wsa:MessageID`
 //!   header injection.
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::protocol::http::HttpHandler;
 use crate::protocol::{ProtocolCapabilities, ProtocolHandler};
-use crate::request::{Body, BodyMode, HttpMethod, KeyValue, Request, Response, ResponseBody};
+use crate::request::{BodyMode, KeyValue, Request, Response, ResponseBody};
 use async_trait::async_trait;
-use quick_xml::de::from_str;
-use quick_xml::se::to_string;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 // ── SOAP envelope types ──────────────────────────────────
 
@@ -468,7 +465,7 @@ fn parse_services(xml: &str) -> Vec<WsdlService> {
         for port_block in extract_block(block, "port") {
             let port_name = extract_attribute(port_block, "name").unwrap_or_default();
             let binding = extract_attribute(port_block, "binding")
-                .map(|s| s.split(':').last().unwrap_or(&s).to_string())
+                .map(|s| s.split(':').next_back().unwrap_or(&s).to_string())
                 .unwrap_or_default();
             let address = extract_attribute(port_block, "location")
                 .or_else(|| extract_attribute(port_block, "address"))
@@ -489,7 +486,7 @@ fn parse_bindings(xml: &str) -> Vec<WsdlBinding> {
     for block in extract_block(xml, "binding") {
         let name = extract_attribute(block, "name").unwrap_or_default();
         let port_type = extract_attribute(block, "type")
-            .map(|s| s.split(':').last().unwrap_or(&s).to_string())
+            .map(|s| s.split(':').next_back().unwrap_or(&s).to_string())
             .unwrap_or_default();
         let transport = extract_attribute(block, "transport").unwrap_or_default();
         let soap_ns = if block.contains("soap:") { "soap:" } else { "" };
@@ -527,11 +524,11 @@ fn parse_port_types(xml: &str) -> Vec<WsdlPortType> {
             let op_name = extract_attribute(op_block, "name").unwrap_or_default();
             let input = if op_block.contains("<input ") || op_block.contains("<input>") {
                 extract_attribute(op_block, "message")
-                    .map(|s| s.split(':').last().unwrap_or(&s).to_string())
+                    .map(|s| s.split(':').next_back().unwrap_or(&s).to_string())
             } else { None };
             let output = if op_block.contains("<output ") || op_block.contains("<output>") {
                 extract_attribute(op_block, "message")
-                    .map(|s| s.split(':').last().unwrap_or(&s).to_string())
+                    .map(|s| s.split(':').next_back().unwrap_or(&s).to_string())
             } else { None };
             operations.push(WsdlOperation {
                 name: op_name,
@@ -556,8 +553,8 @@ fn parse_messages(xml: &str) -> Vec<WsdlMessage> {
             if let Some(pn) = part_name {
                 parts.push(WsdlPart {
                     name: pn,
-                    element: element.map(|s| s.split(':').last().unwrap_or(&s).to_string()),
-                    type_name: type_name.map(|s| s.split(':').last().unwrap_or(&s).to_string()),
+                    element: element.map(|s| s.split(':').next_back().unwrap_or(&s).to_string()),
+                    type_name: type_name.map(|s| s.split(':').next_back().unwrap_or(&s).to_string()),
                 });
             }
         }
@@ -575,7 +572,7 @@ fn derive_action_from_body(body: &str) -> Option<String> {
         for s in body.split('<') {
             if s.starts_with(prefix) && !s.starts_with("soap:") && !s.starts_with("?xml") && !s.starts_with('/') {
                 let name = s
-                    .split(|c: char| c == ' ' || c == '>' || c == '/')
+                    .split([' ', '>', '/'])
                     .next()
                     .unwrap_or("")
                     .to_string();

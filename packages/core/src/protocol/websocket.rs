@@ -2,7 +2,6 @@ use crate::error::{Error, Result};
 use crate::protocol::{ProtocolCapabilities, ProtocolHandler};
 use crate::request::Response;
 use async_trait::async_trait;
-use futures::StreamExt;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;

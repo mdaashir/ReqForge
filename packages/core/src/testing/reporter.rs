@@ -62,14 +62,14 @@ pub fn generate_json(results: &[TestResult]) -> Result<String> {
 pub fn generate_junit_xml(results: &[TestResult]) -> Result<String> {
     let mut xml = String::new();
     xml.push_str(r#"<?xml version="1.0" encoding="UTF-8"?>"#);
-    xml.push_str("\n");
+    xml.push('\n');
     let total = results.len();
     let failures = results.iter().filter(|r| matches!(r.status, crate::testing::TestStatus::Failed)).count();
     xml.push_str(&format!(
         r#"<testsuite name="reqforge" tests="{}" failures="{}" errors="0">"#,
         total, failures
     ));
-    xml.push_str("\n");
+    xml.push('\n');
     for r in results {
         let class = r.name.replace(' ', "_");
         let status = r.status;

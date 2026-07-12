@@ -8,7 +8,7 @@
 
 use crate::error::{Error, Result};
 use crate::history::storage::HistoryEntry;
-use crate::request::{Body, BodyMode, HttpMethod, Request, Response};
+use crate::request::{HttpMethod, Request, Response};
 use chrono::{DateTime, Utc};
 use rusqlite::{params, Connection};
 use std::path::{Path, PathBuf};
@@ -103,7 +103,7 @@ impl SqliteHistoryStorage {
                     Ok(e) => e,
                     Err(_) => continue,
                 };
-                let entry = self::migrate_row(&conn, entry);
+                self::migrate_row(&conn, entry);
                 total += 1;
             }
             tracing::info!(imported = total, "migrated JSONL history");
@@ -312,7 +312,7 @@ mod tests {
             url: "https://api.example.com/users".into(),
             headers: vec![],
             params: vec![],
-            body: Body { mode: BodyMode::None, content: String::new(), content_type: None },
+            body: crate::request::Body { mode: BodyMode::None, content: String::new(), content_type: None },
             auth: None,
             settings: Default::default(),
             pre_request_script: None,

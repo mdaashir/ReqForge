@@ -6,7 +6,7 @@
 //! - **gRPC-Web JSON** (feature off) — gRPC-Web spec over HTTP/1.1, unary only.
 
 use crate::error::{Error, Result};
-use crate::request::{Body, BodyMode, KeyValue, Request, Response, ResponseBody, ResponseSize, ResponseTiming};
+use crate::request::{Request, Response};
 use crate::protocol::{ProtocolCapabilities, ProtocolHandler};
 use async_trait::async_trait;
 
@@ -157,7 +157,7 @@ mod tests {
     fn test_send_returns_result() {
         let h = GrpcHandler::new();
         let req = Request::new(crate::request::HttpMethod::Post, "https://example.com/svc");
-        let body = Body::default();
+        let body = crate::request::Body::default();
         let req = Request { body, ..req };
         let rt = tokio::runtime::Runtime::new().unwrap();
         // Should not panic — may error on network or succeed depending on backend

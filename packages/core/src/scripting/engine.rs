@@ -20,8 +20,8 @@
 //! Rhai provides a JS-like syntax with static types and runs on stable Rust.
 
 use crate::error::{Error, Result};
-use crate::request::{Body, BodyMode, HttpMethod, Request, Response};
-use rhai::{Dynamic, Engine, Map, Scope, AST};
+use crate::request::{HttpMethod, Request, Response};
+use rhai::{Dynamic, Engine, Map, Scope};
 use std::collections::HashMap;
 
 /// Wraps a Rhai scripting engine with the `rf.*` host API installed.

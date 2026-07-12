@@ -4,7 +4,7 @@
 //! streaming body API. Each event is emitted to a channel the caller
 //! can consume asynchronously.
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::protocol::{ProtocolCapabilities, ProtocolHandler};
 use crate::request::Request;
 use async_trait::async_trait;
@@ -86,7 +86,7 @@ impl ProtocolHandler for SseHandler {
                             let line = buf[..newline].to_string();
                             buf = buf[newline + 1..].to_string();
                             if line.starts_with("data: ") {
-                                let data = line[6..].to_string();
+                                let data = line.strip_prefix("data: ").unwrap_or("").to_string();
                                 let _ = tx
                                     .send(SseEvent {
                                         id: None,

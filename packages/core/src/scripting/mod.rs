@@ -43,7 +43,7 @@ mod engine;
 
 pub use engine::ScriptRuntime;
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 
 /// Result of running a pre-request script. The script can mutate the
 /// request or cancel it entirely.

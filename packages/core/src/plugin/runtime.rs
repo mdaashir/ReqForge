@@ -10,6 +10,12 @@ pub use crate::PluginHost;
 /// Stub — plugins feature not enabled
 pub struct PluginHost;
 #[cfg(not(feature = "plugins"))]
+impl Default for PluginHost {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PluginHost {
     pub fn new() -> Self { Self }
 }

@@ -99,6 +99,9 @@ notify = { version = "7.0", optional = true }
 # Git integration (auto-commit, sync)
 git2 = { version = "0.19", optional = true }
 
+[lints]
+rust.unexpected_cfgs = { level = "allow", check-cfg = ['cfg(http3)'] }
+
 [features]
 default = []
 rsa-signing = ["dep:rsa"]

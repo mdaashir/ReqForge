@@ -5,9 +5,9 @@
 
 use crate::collection::model::{Collection, CollectionItem};
 use crate::environment::VariableResolver;
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::request::RequestExecutor;
-use crate::request::{Request, Response};
+use crate::request::Request;
 use crate::testing::{Assertion, TestResult, TestRunner, TestStatus};
 use std::collections::HashMap;
 
@@ -59,7 +59,7 @@ impl CollectionRunner {
         &self,
         collection: &Collection,
         filter_ids: Option<&[String]>,
-        mode: RunMode,
+        _mode: RunMode,
         environment: Option<&std::collections::HashMap<String, String>>,
         tests: Option<&[Assertion]>,
     ) -> Result<CollectionRunSummary> {
@@ -92,7 +92,7 @@ impl CollectionRunner {
         let mut results = Vec::with_capacity(requests.len());
         for (req, name, id) in &requests {
             let r = self
-                .run_single(collection, req, name, id, environment.as_deref(), &test_runner)
+                .run_single(collection, req, name, id, environment, &test_runner)
                 .await;
             results.push(r);
         }
@@ -135,7 +135,7 @@ impl CollectionRunner {
                     assertions: vec![],
                     duration_ms,
                 }));
-                let passed = test_result.as_ref().map(|t| matches!(t.status, TestStatus::Passed)).unwrap_or(true);
+                let _passed = test_result.as_ref().map(|t| matches!(t.status, TestStatus::Passed)).unwrap_or(true);
 
                 CollectionRunResult {
                     request_id: id.to_string(),

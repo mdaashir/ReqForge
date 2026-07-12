@@ -15,7 +15,6 @@
 
 use crate::error::{Error, Result};
 use serde_json::Value;
-use std::cmp::Ordering;
 use std::path::{Path, PathBuf};
 
 /// Manages golden snapshot files on disk.
