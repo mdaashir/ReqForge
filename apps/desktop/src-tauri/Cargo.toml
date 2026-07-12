@@ -1,0 +1,29 @@
+[package]
+name = "reqforge"
+version = "0.1.0"
+description = "ReqForge - Ultimate API Development Platform"
+authors = ["ReqForge Team"]
+license = "AGPL-3.0"
+repository = "https://github.com/reqforge/reqforge"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = [] }
+
+[dependencies]
+reqforge-core = { path = "../../../packages/core" }
+tauri = { version = "2.0", features = [] }
+tauri-plugin-shell = "2.0"
+tauri-plugin-dialog = "2.0"
+tauri-plugin-fs = "2.0"
+tauri-plugin-updater = "2.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.35", features = ["full"] }
+anyhow = "1.0"
+open = "5.0"
+keyring = "2.3"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
