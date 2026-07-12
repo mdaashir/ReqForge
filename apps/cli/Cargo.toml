@@ -1,0 +1,25 @@
+[package]
+name = "reqforge-cli"
+version = "0.1.0"
+description = "ReqForge CLI - Run collections and tests from the command line"
+authors = ["ReqForge Team"]
+license = "AGPL-3.0"
+edition = "2021"
+
+[[bin]]
+name = "reqforge"
+path = "src/main.rs"
+
+[dependencies]
+reqforge-core = { path = "../../packages/core" }
+clap = { version = "4.4", features = ["derive", "cargo"] }
+tokio = { version = "1.35", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+anyhow = "1.0"
+colored = "3.0"
+comfy-table = "7.1"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.6", features = ["v4"] }
+reqwest = { version = "0.11", features = ["json"] }
