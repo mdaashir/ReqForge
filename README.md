@@ -72,6 +72,10 @@ cd apps/desktop && cargo tauri dev
 All P0 blueprint requirements implemented. 142 unit + 9 property tests passing.
 See [BLUEPRINT.md](docs/developement/BLUEPRINT.md) for full scope.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, code quality, commit conventions, and architectural guidelines.
+
 ## License
 
 AGPL-3.0 — see [LICENSE](LICENSE).
