@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@v4
         with:
           version: 8
       - uses: actions/setup-node@v5
@@ -82,7 +82,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@v4
         with:
           version: 8
       - uses: actions/setup-node@v5
