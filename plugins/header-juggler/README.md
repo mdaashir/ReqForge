@@ -1,30 +1,41 @@
 # Header Juggler — ReqForge Plugin Sample
 
-A minimal plugin for ReqForge that demonstrates the WASM plugin ABI.
+A minimal WASM plugin for ReqForge that demonstrates the plugin ABI.
 
 ## What it does
 
-Intercepts every outgoing HTTP request and adds an `X-Header-Juggler: processed` header.
+Intercepts outgoing HTTP requests and adds `X-Header-Juggler: processed`.
 
 ## Building
 
 ```bash
+rustup target add wasm32-unknown-unknown
 cargo build --target wasm32-unknown-unknown --release
 cp target/wasm32-unknown-unknown/release/header_juggler.wasm .
 ```
 
-The output `.wasm` is ~4 KB.
+Output: ~4 KB `.wasm`.
+
+## Requirements
+
+ReqForge must be built with `plugins` feature to load WASM plugins:
+```bash
+cargo build --features plugins
+```
 
 ## Testing locally
 
-Copy the plugin into your ReqForge workspace:
-
 ```bash
-cp -R plugins/header-juggler ~/.reqforge/workspace/plugins/
+cp path/to/header_juggler/ ~/.reqforge/workspace/plugins/
+# Enable via ReqForge → Plugins → Header Juggler
+# All requests will get: X-Header-Juggler: processed
 ```
 
-Open ReqForge → Plugins → Header Juggler → Enable. Send any request and
-check that `X-Header-Juggler: processed` appears in the response headers.
+## ABI
+
+The plugin exports:
+- `alloc(size: i32) -> i32` — allocate memory (optional, falls back to static buffer)
+- `handle(input_len, input_ptr) -> i32` — process JSON message, return JSON response
 
 ## ABI
 

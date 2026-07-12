@@ -1,6 +1,6 @@
 # reqforge CLI
 
-Run ReqForge collections from the command line. Useful for CI/CD and headless test execution.
+Run ReqForge collections from the command line for CI/CD and headless test execution.
 
 ## Build
 
@@ -8,62 +8,70 @@ Run ReqForge collections from the command line. Useful for CI/CD and headless te
 cargo build --release -p reqforge-cli
 ```
 
-The binary will be at `target/release/reqforge`.
+Binary at `target/release/reqforge`.
 
 ## Commands
 
-### `reqforge list`
+| Command | Description |
+|---------|-------------|
+| `run` | Execute a collection or single request |
+| `test` | Run tests from a collection with pass/fail reporting |
+| `mock` | Start a local mock server |
+| `import` | Import collections (Postman, cURL, Insomnia) |
+| `export` | Export collections (JSON, YAML) |
+| `list` | List all collections |
+| `info` | Show workspace info |
+| `validate` | Validate all collections |
+| `plugin` | Search and install marketplace plugins |
 
-List all collections in the workspace.
-
-```bash
-reqforge list
-reqforge list --format json
-```
-
-### `reqforge info`
-
-Print workspace info.
-
-```bash
-reqforge info
-```
-
-### `reqforge validate`
-
-Validate every collection in the workspace.
-
-```bash
-reqforge validate
-```
-
-### `reqforge run`
-
-Run a collection or a single request.
+### `run`
 
 ```bash
 reqforge run --collection <id>
-reqforge run --collection <id> --request "Get Users"
 reqforge run --collection <id> --env Production --format json
 ```
 
-Exit codes:
-- `0` — all requests passed
-- `1` — validation error or runtime error
-- `2` — one or more requests failed (only for `run`)
+### `test`
+
+```bash
+reqforge test --collection <id>
+reqforge test --collection <id> --env Staging
+```
+
+Exit codes: `0` = all passed, `1` = runtime error, `2` = assertions failed.
+
+### `mock`
+
+```bash
+reqforge mock
+reqforge mock --port 8080
+```
+
+### `import`
+
+```bash
+reqforge import --file collection.json
+reqforge import --file collection.json --format postman --name "My API"
+```
+
+### `export`
+
+```bash
+reqforge export --collection <id>
+reqforge export --collection <id> --format yaml --output ./backup.yaml
+```
 
 ## Output formats
 
-- `human` (default) — coloured, table-formatted output
-- `json` — JSON for scripting
-- `junit` — JUnit XML (planned; falls back to JSON for now)
+- `human` (default) — coloured table output
+- `json` — structured JSON
+- `junit` — JUnit XML for CI
 
-## Example: CI integration
+## CI integration
 
 ```yaml
-# .github/workflows/api-tests.yml
 - name: Run API tests
   run: |
     cargo build --release -p reqforge-cli
-    ./target/release/reqforge run --collection core-api --format junit > results.xml
+    ./target/release/reqforge test --collection core-api --format junit > results.xml
 ```
