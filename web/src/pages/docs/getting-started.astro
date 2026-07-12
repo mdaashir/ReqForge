@@ -1,0 +1,61 @@
+---
+import Layout from '../../layouts/Layout.astro'
+---
+<Layout title="ReqForge — Getting Started">
+  <div class="container" style="display: flex; gap: 3rem;">
+    <nav class="doc-sidebar">
+      <h4>Getting Started</h4>
+      <a href="/docs/getting-started" class="active">Installation & Quickstart</a>
+      <a href="/docs/collections">Collections & Requests</a>
+      <a href="/docs/environments">Environments & Variables</a>
+      <a href="/docs/auth">Authentication</a>
+      <h4>Guides</h4>
+      <a href="/docs/testing">Testing & Scripts</a>
+      <a href="/docs/import-export">Importing & Exporting</a>
+      <a href="/docs/plugins">Plugin Development</a>
+      <a href="/docs/sync">Cloud Sync</a>
+      <h4>Reference</h4>
+      <a href="/docs/cli">CLI Reference</a>
+      <a href="/docs/keyboard">Keyboard Shortcuts</a>
+      <a href="/docs/troubleshooting">Troubleshooting</a>
+    </nav>
+    <article class="doc-content">
+      <h1>Installation & Quickstart</h1>
+
+      <h2>Desktop App</h2>
+      <p>Download the latest release for your platform from <a href="https://github.com/reqforge/reqforge/releases">GitHub Releases</a>.</p>
+      <pre># macOS
+curl -sSL https://github.com/reqforge/reqforge/releases/latest/download/reqforge-aarch64-apple-darwin.tar.gz | tar -xz
+
+# Linux
+curl -sSL https://github.com/reqforge/reqforge/releases/latest/download/reqforge-x86_64-unknown-linux-gnu.tar.xz | tar -xJ
+
+# Windows
+# Download the .zip and extract</pre>
+
+      <h2>CLI</h2>
+      <p>The CLI is bundled with the desktop app, or you can download it separately:</p>
+      <pre># Run a request
+reqforge run https://api.example.com/users
+
+# Validate a collection
+reqforge validate -w ~/workspace
+
+# List collections
+reqforge list -w ~/workspace
+
+# Search the plugin marketplace
+reqforge plugin search logging --tag logging</pre>
+
+      <h2>Quick Tour</h2>
+      <p>When you open ReqForge for the first time, you'll see:</p>
+      <ul>
+        <li><strong>URL Bar</strong> — type your request URL and select the HTTP method</li>
+        <li><strong>Params / Headers / Body</strong> — tabs to configure each part of the request</li>
+        <li><strong>Send button</strong> — executes the request</li>
+        <li><strong>Response panel</strong> — shows status, headers, body, and timing</li>
+        <li><strong>Command palette</strong> — Ctrl+K to search and run commands</li>
+      </ul>
+    </article>
+  </div>
+</Layout>

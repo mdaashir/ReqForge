@@ -1,0 +1,69 @@
+---
+import Layout from '../layouts/Layout.astro'
+---
+<Layout title="ReqForge Documentation — Getting Started">
+  <div class="container" style="display: flex; gap: 3rem;">
+    <nav class="doc-sidebar">
+      <h4>Getting Started</h4>
+      <a href="/docs/getting-started" class="active">Installation & Quickstart</a>
+      <a href="/docs/collections">Collections & Requests</a>
+      <a href="/docs/environments">Environments & Variables</a>
+      <a href="/docs/auth">Authentication</a>
+      <h4>Guides</h4>
+      <a href="/docs/testing">Testing & Scripts</a>
+      <a href="/docs/import-export">Importing & Exporting</a>
+      <a href="/docs/plugins">Plugin Development</a>
+      <a href="/docs/sync">Cloud Sync</a>
+      <h4>Reference</h4>
+      <a href="/docs/cli">CLI Reference</a>
+      <a href="/docs/keyboard">Keyboard Shortcuts</a>
+      <a href="/docs/troubleshooting">Troubleshooting</a>
+    </nav>
+    <article class="doc-content">
+      <h1>Welcome to ReqForge</h1>
+      <p>
+        ReqForge is an open-source, cross-platform API development platform.
+        It ships as a native desktop app (Windows, macOS, Linux) and a command-line
+        tool. Everything works offline — no account required.
+      </p>
+
+      <h2>Quick Install</h2>
+      <pre># macOS (Homebrew)
+brew install reqforge/tap/reqforge
+
+# Windows (winget)
+winget install reqforge
+
+# Linux (deb)
+curl -sSL https://get.reqforge.io | sh
+
+# Or download binaries from GitHub Releases:
+# https://github.com/reqforge/reqforge/releases</pre>
+
+      <h2>Your First Request</h2>
+      <pre>1. Open ReqForge
+2. Type https://jsonplaceholder.typicode.com/todos/1 in the URL bar
+3. Click Send
+4. See the JSON response in the response panel</pre>
+
+      <p>That's it. You just sent your first request.</p>
+
+      <h2>Importing Existing Collections</h2>
+      <p>
+        ReqForge can import collections from Postman, cURL, Insomnia, and Bruno:
+      </p>
+      <pre># Postman v2.1 — File → Import → Postman
+# cURL — Paste your curl command directly into the URL bar
+# Insomnia — File → Import → Insomnia
+# Bruno — File → Import → Bruno</pre>
+
+      <h2>Next Steps</h2>
+      <ul>
+        <li><a href="/docs/collections">Organize requests into collections</a></li>
+        <li><a href="/docs/environments">Set up environments with variables</a></li>
+        <li><a href="/docs/auth">Configure authentication</a></li>
+        <li><a href="/docs/testing">Write test assertions</a></li>
+      </ul>
+    </article>
+  </div>
+</Layout>
