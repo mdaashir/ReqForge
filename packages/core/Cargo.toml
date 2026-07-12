@@ -1,0 +1,127 @@
+[package]
+name = "reqforge-core"
+version = "0.1.0"
+description = "ReqForge Core - Shared library for request execution, protocols, and storage"
+authors = ["ReqForge Team"]
+license = "AGPL-3.0"
+edition = "2021"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+async-trait = "0.1"
+futures = "0.3"
+
+# HTTP client
+reqwest = { version = "0.11", features = ["json", "cookies", "gzip", "brotli", "stream"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# UUID
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+# URL handling
+url = "2.5"
+
+# Regex for variable resolution
+regex = "1.10"
+
+# Base64 encoding (for Basic auth)
+base64 = "0.22"
+
+# Hex encoding (for AWS SigV4)
+hex = "0.4"
+
+# JWT encoding/decoding
+jsonwebtoken = "9.2"
+
+# PKCE + JWT signing helpers (RFC 7636)
+rand = "0.8"
+sha2 = "0.10"
+rsa = { version = "0.9", optional = true }
+
+# Plugin host
+wasmtime = { version = "14.0", optional = true }
+toml = "0.8"
+
+# CRDT-based sync (collections, environments)
+yrs = { version = "0.27", optional = true }
+
+# Mock server (light HTTP server for testing)
+axum = { version = "0.7", optional = true }
+
+# WebSocket client (replaces the MVP stub with real connections)
+tokio-tungstenite = { version = "0.21", optional = true }
+
+# Full gRPC via HTTP/2 (reqwest-based, no tonic dependency)
+tokio-stream = { version = "0.1", optional = true }
+
+# Encrypted at-rest storage
+aes-gcm = "0.10"
+hmac = "0.12"
+zeroize = "1.7"
+
+# MQTT client
+rumqttc = { version = "0.24", optional = true }
+
+# Kafka client (pure Rust, no C deps)
+kafka = { version = "0.10", optional = true }
+
+# Script engine (JS-like pre-request / post-response scripting)
+rhai = { version = "1.19", features = ["sync", "serde"] }
+
+# SQLite for fast history queries (always available in core)
+rusqlite = { version = "0.31", features = ["bundled"] }
+
+# JSON Schema validation for test assertions
+jsonschema = "0.18"
+
+# XML/SOAP support (envelope builder, WSDL parser)
+quick-xml = { version = "0.36", features = ["serialize"] }
+
+# File watcher (reload collections on disk changes)
+notify = { version = "7.0", optional = true }
+
+# Git integration (auto-commit, sync)
+git2 = { version = "0.19", optional = true }
+
+[features]
+default = []
+rsa-signing = ["dep:rsa"]
+plugins = ["dep:wasmtime"]
+sync = ["dep:yrs"]
+mock-server = ["dep:axum"]
+ws = ["dep:tokio-tungstenite"]
+grpc-tonic = ["dep:tokio-stream"]
+# script-engine is always-on via rhai (stable Rust, zero C deps)
+mqtt = ["dep:rumqttc"]
+kafka = ["dep:kafka"]
+watcher = ["dep:notify", "dep:git2"]
+
+[dev-dependencies]
+tokio-test = "0.4"
+mockito = "1.2"
+tempfile = "3.8"
+proptest = "1.4"
+
+[dev-dependencies.criterion]
+version = "0.5"
+features = ["html_reports"]
+
+[[bench]]
+name = "request_bench"
+harness = false
