@@ -27,6 +27,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
+          cache: npm
+          cache-dependency-path: packages/ui/package-lock.json
       - run: npm audit --audit-level=high
         continue-on-error: true
         working-directory: packages/ui
