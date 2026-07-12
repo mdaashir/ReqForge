@@ -1,0 +1,130 @@
+name: Release
+
+# Builds the ReqForge CLI (and optionally the desktop bundle) for every
+# supported platform and uploads the artifacts to a GitHub Release.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish a draft release?'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: write
+
+jobs:
+  cli:
+    name: CLI (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            archive: tar.xz
+            binary: reqforge
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            archive: tar.xz
+            binary: reqforge
+            cross: true
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            archive: tar.gz
+            binary: reqforge
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            archive: tar.gz
+            binary: reqforge
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            archive: zip
+            binary: reqforge.exe
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install cross (for aarch64 Linux)
+        if: matrix.cross
+        run: cargo install cross --git https://github.com/cross-rs/cross --locked
+
+      - name: Cache cargo registry & target
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "packages/cli -> target"
+          shared-key: ${{ matrix.target }}
+
+      - name: Build CLI
+        working-directory: packages/cli
+        run: |
+          if [ "${{ matrix.cross }}" = "true" ]; then
+            cross build --release --target ${{ matrix.target }} --bin reqforge
+          else
+            cargo build --release --target ${{ matrix.target }} --bin reqforge
+          fi
+
+      - name: Package artifact
+        shell: bash
+        run: |
+          cd "packages/cli/target/${{ matrix.target }}/release"
+          BIN="${{ matrix.binary }}"
+          if [ ! -f "$BIN" ]; then
+            echo "Binary $BIN not found!"
+            exit 1
+          fi
+          mkdir -p staging
+          cp "$BIN" staging/
+          strip "staging/$BIN" || true
+          cd staging
+          case "${{ matrix.archive }}" in
+            tar.xz)
+              tar -cJf "../../${{ matrix.target }}.tar.xz" .
+              ;;
+            tar.gz)
+              tar -czf "../../${{ matrix.target }}.tar.gz" .
+              ;;
+            zip)
+              7z a "../${{ matrix.target }}.zip" .
+              ;;
+          esac
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: reqforge-cli-${{ matrix.target }}
+          path: packages/cli/target/${{ matrix.target }}.${{ matrix.archive }}
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: cli
+    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.publish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create / update release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          files: |
+            artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
