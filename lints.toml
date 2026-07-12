@@ -1,0 +1,63 @@
+# Workspace-wide lints configuration.
+#
+# Applied to every member crate that does `[lints] workspace = true` in
+# its own Cargo.toml. Keeps clippy + rustc warning policy in one place
+# so we can tighten it without editing every package.
+
+[lints.rust]
+# Treat dead code as a warning at the workspace level; individual items
+# are silenced with #[allow(dead_code)] where intentional (forward-compat
+# API surface, alternative constructors).
+dead_code = "warn"
+
+[lints.clippy]
+# Pedantic correctness lints we enforce everywhere.
+correctness = { level = "warn", priority = -1 }
+suspicious = { level = "warn", priority = -1 }
+style = { level = "warn", priority = -1 }
+complexity = { level = "warn", priority = -1 }
+perf = { level = "warn", priority = -1 }
+# `clippy::pedantic` is opted into per-module, not by default — too noisy
+# for a young codebase. Lints we keep on:
+as_underscore = "warn"
+clone_on_copy = "warn"
+empty_enum = "warn"
+enum_glob_use = "warn"
+equatable_if_let = "warn"
+explicit_iter_loop = "warn"
+explicit_into_iter_loop = "warn"
+filter_map_next = "warn"
+flat_map_option = "warn"
+float_cmp_const = "warn"
+fn_params_excessive_bools = "warn"
+if_let_some_else_none = "warn"
+ignored_unit_patterns = "warn"
+inefficient_to_string = "warn"
+items_after_statements = "warn"
+match_wild_err_arm = "warn"
+mem_forget = "warn"
+mod_module_files = "warn"
+mutex_integer = "warn"
+needless_continue = "warn"
+needless_for_each = "warn"
+needless_pass_by_value = "warn"
+non_send_fields_in_send_ty = "warn"
+option_if_let_else = "warn"
+path_buf_push_overwrite = "warn"
+rc_buffer = "warn"
+rc_mutex = "warn"
+redundant_closure_for_method_calls = "warn"
+ref_option = "warn"
+rest_pat_in_fully_bound_structs = "warn"
+same_name_method = "warn"
+semicolon_if_nothing_returned = "warn"
+string_add_assign = "warn"
+string_lit_as_bytes = "warn"
+string_to_string = "warn"
+todo = "warn"
+unimplemented = "warn"
+unnecessary_self_imports = "warn"
+unneeded_field_pattern = "warn"
+unreachable = "warn"
+verbose_file_reads = "warn"
+wildcard_dependencies = "warn"
