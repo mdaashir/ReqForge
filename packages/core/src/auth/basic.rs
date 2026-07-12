@@ -72,7 +72,11 @@ mod tests {
 
         let authed = auth.apply(req).await.unwrap();
 
-        let auth_header = authed.headers.iter().find(|h| h.key == "Authorization").unwrap();
+        let auth_header = authed
+            .headers
+            .iter()
+            .find(|h| h.key == "Authorization")
+            .unwrap();
         // base64("alice:secret") = "YWxpY2U6c2VjcmV0"
         assert_eq!(auth_header.value, "Basic YWxpY2U6c2VjcmV0");
     }

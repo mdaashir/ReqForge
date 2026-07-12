@@ -33,8 +33,14 @@ pub fn write_report(results: &[TestResult], path: &Path, format: ReportFormat) -
 
 /// Generate a JSON report from test results.
 pub fn generate_json(results: &[TestResult]) -> Result<String> {
-    let passed = results.iter().filter(|r| matches!(r.status, crate::testing::TestStatus::Passed)).count();
-    let failed = results.iter().filter(|r| matches!(r.status, crate::testing::TestStatus::Failed)).count();
+    let passed = results
+        .iter()
+        .filter(|r| matches!(r.status, crate::testing::TestStatus::Passed))
+        .count();
+    let failed = results
+        .iter()
+        .filter(|r| matches!(r.status, crate::testing::TestStatus::Failed))
+        .count();
     let total = results.len();
 
     let report = serde_json::json!({
@@ -64,7 +70,10 @@ pub fn generate_junit_xml(results: &[TestResult]) -> Result<String> {
     xml.push_str(r#"<?xml version="1.0" encoding="UTF-8"?>"#);
     xml.push('\n');
     let total = results.len();
-    let failures = results.iter().filter(|r| matches!(r.status, crate::testing::TestStatus::Failed)).count();
+    let failures = results
+        .iter()
+        .filter(|r| matches!(r.status, crate::testing::TestStatus::Failed))
+        .count();
     xml.push_str(&format!(
         r#"<testsuite name="reqforge" tests="{}" failures="{}" errors="0">"#,
         total, failures
@@ -77,12 +86,16 @@ pub fn generate_junit_xml(results: &[TestResult]) -> Result<String> {
         if passed {
             xml.push_str(&format!(
                 r#"  <testcase name="{}" classname="{}" time="{:.3}" />"#,
-                r.name, class, r.duration_ms as f64 / 1000.0
+                r.name,
+                class,
+                r.duration_ms as f64 / 1000.0
             ));
         } else {
             xml.push_str(&format!(
                 r#"  <testcase name="{}" classname="{}" time="{:.3}">"#,
-                r.name, class, r.duration_ms as f64 / 1000.0
+                r.name,
+                class,
+                r.duration_ms as f64 / 1000.0
             ));
             xml.push_str(r#"<failure>"#);
             xml.push_str("Test failed:");
@@ -101,10 +114,20 @@ pub fn generate_junit_xml(results: &[TestResult]) -> Result<String> {
 
 /// Generate a self-contained HTML report from test results.
 pub fn generate_html(results: &[TestResult]) -> Result<String> {
-    let passed = results.iter().filter(|r| matches!(r.status, crate::testing::TestStatus::Passed)).count();
-    let failed = results.iter().filter(|r| matches!(r.status, crate::testing::TestStatus::Failed)).count();
+    let passed = results
+        .iter()
+        .filter(|r| matches!(r.status, crate::testing::TestStatus::Passed))
+        .count();
+    let failed = results
+        .iter()
+        .filter(|r| matches!(r.status, crate::testing::TestStatus::Failed))
+        .count();
     let total = results.len();
-    let pass_pct = if total > 0 { (passed as f64 / total as f64) * 100.0 } else { 0.0 };
+    let pass_pct = if total > 0 {
+        (passed as f64 / total as f64) * 100.0
+    } else {
+        0.0
+    };
 
     let mut rows = String::new();
     for r in results {
@@ -184,13 +207,26 @@ pub fn generate_html(results: &[TestResult]) -> Result<String> {
 /// Generate a Markdown report from test results.
 pub fn generate_markdown(results: &[TestResult]) -> Result<String> {
     let total = results.len();
-    let passed = results.iter().filter(|r| matches!(r.status, crate::testing::TestStatus::Passed)).count();
-    let failed = results.iter().filter(|r| matches!(r.status, crate::testing::TestStatus::Failed)).count();
-    let pass_pct = if total > 0 { (passed as f64 / total as f64) * 100.0 } else { 0.0 };
+    let passed = results
+        .iter()
+        .filter(|r| matches!(r.status, crate::testing::TestStatus::Passed))
+        .count();
+    let failed = results
+        .iter()
+        .filter(|r| matches!(r.status, crate::testing::TestStatus::Failed))
+        .count();
+    let pass_pct = if total > 0 {
+        (passed as f64 / total as f64) * 100.0
+    } else {
+        0.0
+    };
 
     let mut md = String::new();
     md.push_str("# Test Report\n\n");
-    md.push_str(&format!("**Total:** {} | **Passed:** {} | **Failed:** {} | **Pass rate:** {:.1}%\n\n", total, passed, failed, pass_pct));
+    md.push_str(&format!(
+        "**Total:** {} | **Passed:** {} | **Failed:** {} | **Pass rate:** {:.1}%\n\n",
+        total, passed, failed, pass_pct
+    ));
     md.push_str("| Status | Test | Duration |\n");
     md.push_str("|--------|------|----------|\n");
     for r in results {
@@ -199,7 +235,10 @@ pub fn generate_markdown(results: &[TestResult]) -> Result<String> {
             crate::testing::TestStatus::Failed => "❌",
             _ => "⏭",
         };
-        md.push_str(&format!("| {} | {} | {}ms |\n", icon, r.name, r.duration_ms));
+        md.push_str(&format!(
+            "| {} | {} | {}ms |\n",
+            icon, r.name, r.duration_ms
+        ));
         for a in &r.assertions {
             if !a.passed {
                 md.push_str(&format!("| | ⚠ {} | |\n", a.message));
@@ -212,11 +251,15 @@ pub fn generate_markdown(results: &[TestResult]) -> Result<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::testing::{Assertion, AssertionType, TestResult, TestStatus};
     use crate::request::Response;
+    use crate::testing::{Assertion, AssertionType, TestResult, TestStatus};
 
     fn dummy_result(name: &str, passed: bool) -> TestResult {
-        let status = if passed { TestStatus::Passed } else { TestStatus::Failed };
+        let status = if passed {
+            TestStatus::Passed
+        } else {
+            TestStatus::Failed
+        };
         TestResult {
             name: name.to_string(),
             status,

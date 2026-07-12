@@ -43,9 +43,7 @@ pub async fn issue_token_handler(
     Json(req): Json<TokenRequest>,
 ) -> ServerResult<impl IntoResponse> {
     if req.refresh_token.trim().is_empty() {
-        return Err(ServerError::BadRequest(
-            "refresh_token is required".into(),
-        ));
+        return Err(ServerError::BadRequest("refresh_token is required".into()));
     }
     let user_id = req.user_id.unwrap_or_else(|| {
         // Hash the refresh token to derive a stable user id when none
@@ -101,7 +99,11 @@ pub async fn create_doc(
         .upsert_doc_state_async(&doc_id, &claims.sub, &state_bytes)
         .await?;
 
-    let meta = state.db.get_doc_meta_async(&doc_id).await?.ok_or(ServerError::NotFound)?;
+    let meta = state
+        .db
+        .get_doc_meta_async(&doc_id)
+        .await?
+        .ok_or(ServerError::NotFound)?;
     Ok((StatusCode::CREATED, Json(meta)))
 }
 
@@ -118,7 +120,10 @@ pub async fn get_doc_meta(
     AuthUser(claims): AuthUser,
     Path(doc_id): Path<String>,
 ) -> ServerResult<Json<DocMeta>> {
-    let meta = state.db.get_doc_meta(&doc_id)?.ok_or(ServerError::NotFound)?;
+    let meta = state
+        .db
+        .get_doc_meta(&doc_id)?
+        .ok_or(ServerError::NotFound)?;
     if meta.owner != claims.sub {
         return Err(ServerError::NotFound);
     }
@@ -130,7 +135,10 @@ pub async fn delete_doc(
     AuthUser(claims): AuthUser,
     Path(doc_id): Path<String>,
 ) -> ServerResult<impl IntoResponse> {
-    let meta = state.db.get_doc_meta(&doc_id)?.ok_or(ServerError::NotFound)?;
+    let meta = state
+        .db
+        .get_doc_meta(&doc_id)?
+        .ok_or(ServerError::NotFound)?;
     if meta.owner != claims.sub {
         return Err(ServerError::NotFound);
     }

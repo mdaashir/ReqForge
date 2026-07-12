@@ -98,7 +98,11 @@ mod tests {
         let req = Request::new(HttpMethod::Get, "https://api.example.com");
 
         let authed = auth.apply(req).await.unwrap();
-        let auth_header = authed.headers.iter().find(|h| h.key == "Authorization").unwrap();
+        let auth_header = authed
+            .headers
+            .iter()
+            .find(|h| h.key == "Authorization")
+            .unwrap();
         assert_eq!(auth_header.value, "Token abc");
     }
 
@@ -108,7 +112,11 @@ mod tests {
         let req = Request::new(HttpMethod::Get, "https://api.example.com");
 
         let authed = auth.apply(req).await.unwrap();
-        let auth_header = authed.headers.iter().find(|h| h.key == "Authorization").unwrap();
+        let auth_header = authed
+            .headers
+            .iter()
+            .find(|h| h.key == "Authorization")
+            .unwrap();
         assert_eq!(auth_header.value, "custom-token");
     }
 

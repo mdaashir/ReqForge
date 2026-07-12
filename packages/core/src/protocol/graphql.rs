@@ -16,7 +16,6 @@ pub enum GraphQLOperationType {
     Subscription,
 }
 
-
 /// A parsed GraphQL request body
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GraphQLBody {

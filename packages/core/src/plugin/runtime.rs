@@ -17,6 +17,7 @@ impl Default for PluginHost {
 }
 
 impl PluginHost {
-    pub fn new() -> Self { Self }
+    pub fn new() -> Self {
+        Self
+    }
 }
-

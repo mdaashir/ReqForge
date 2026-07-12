@@ -22,9 +22,11 @@ pub struct CredentialMeta {
 /// Save a credential to the OS keychain.
 pub async fn keychain_set(account: String, value: String) -> Result<(), String> {
     tokio::task::spawn_blocking(move || {
-        let entry = keyring::Entry::new(SERVICE, &account)
-            .map_err(|e| format!("keychain entry: {e}"))?;
-        entry.set_password(&value).map_err(|e| format!("keychain set: {e}"))
+        let entry =
+            keyring::Entry::new(SERVICE, &account).map_err(|e| format!("keychain entry: {e}"))?;
+        entry
+            .set_password(&value)
+            .map_err(|e| format!("keychain set: {e}"))
     })
     .await
     .map_err(|e| format!("keychain task: {e}"))?
@@ -34,8 +36,8 @@ pub async fn keychain_set(account: String, value: String) -> Result<(), String> 
 /// account does not exist.
 pub async fn keychain_get(account: String) -> Result<Option<String>, String> {
     tokio::task::spawn_blocking(move || {
-        let entry = keyring::Entry::new(SERVICE, &account)
-            .map_err(|e| format!("keychain entry: {e}"))?;
+        let entry =
+            keyring::Entry::new(SERVICE, &account).map_err(|e| format!("keychain entry: {e}"))?;
         match entry.get_password() {
             Ok(value) => Ok(Some(value)),
             Err(keyring::Error::NoEntry) => Ok(None),
@@ -50,8 +52,8 @@ pub async fn keychain_get(account: String) -> Result<Option<String>, String> {
 /// didn't exist (idempotent — doesn't error).
 pub async fn keychain_delete(account: String) -> Result<bool, String> {
     tokio::task::spawn_blocking(move || {
-        let entry = keyring::Entry::new(SERVICE, &account)
-            .map_err(|e| format!("keychain entry: {e}"))?;
+        let entry =
+            keyring::Entry::new(SERVICE, &account).map_err(|e| format!("keychain entry: {e}"))?;
         match entry.delete_password() {
             Ok(()) => Ok(true),
             Err(keyring::Error::NoEntry) => Ok(false),
@@ -101,8 +103,7 @@ pub async fn record_account(workspace_root: &str, account: &str) -> Result<(), S
                 .map(|d| d.as_millis() as u64)
                 .unwrap_or(0),
         });
-        let bytes = serde_json::to_vec_pretty(&entries)
-            .map_err(|e| format!("serialize: {e}"))?;
+        let bytes = serde_json::to_vec_pretty(&entries).map_err(|e| format!("serialize: {e}"))?;
         tokio::fs::write(&index_path, bytes)
             .await
             .map_err(|e| format!("write index: {e}"))?;

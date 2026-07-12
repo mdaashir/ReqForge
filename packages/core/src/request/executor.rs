@@ -1,7 +1,11 @@
-use crate::auth::{ApiKeyAuth, ApiKeyLocation, AuthProvider, BasicAuth, BearerAuth, JwtAuth, OAuth2Auth};
+use crate::auth::{
+    ApiKeyAuth, ApiKeyLocation, AuthProvider, BasicAuth, BearerAuth, JwtAuth, OAuth2Auth,
+};
 use crate::environment::VariableResolver;
 use crate::error::{Error, Result};
-use crate::request::{AuthType, HttpMethod, Request, Response, ResponseBody, ResponseSize, ResponseTiming};
+use crate::request::{
+    AuthType, HttpMethod, Request, Response, ResponseBody, ResponseSize, ResponseTiming,
+};
 use crate::scripting;
 use reqwest::Client;
 use std::collections::HashMap;
@@ -81,7 +85,11 @@ impl RequestExecutor {
                     scripting::run_post_response(&script, &request, &response, &env_vars)
                 {
                     if let Some(body) = result.body {
-                        response.body = crate::request::ResponseBody { content: body.into_bytes(), content_type: None, is_text: true };
+                        response.body = crate::request::ResponseBody {
+                            content: body.into_bytes(),
+                            content_type: None,
+                            is_text: true,
+                        };
                     }
                 }
             }
@@ -92,7 +100,8 @@ impl RequestExecutor {
 
     /// Execute a request without variable resolution (backward compatible)
     pub async fn execute(&self, request: Request) -> Result<Response> {
-        self.execute_with_resolver(request, &VariableResolver::new()).await
+        self.execute_with_resolver(request, &VariableResolver::new())
+            .await
     }
 
     /// Resolve `{{var}}` placeholders in URL, headers, params, and body
@@ -167,10 +176,8 @@ impl RequestExecutor {
                 let access_token = config.get("access_token").cloned().unwrap_or_default();
                 let mut provider = OAuth2Auth::new(access_token);
                 if let Some(refresh) = config.get("refresh_token") {
-                    provider = OAuth2Auth::with_refresh(
-                        provider.access_token.clone(),
-                        refresh.clone(),
-                    );
+                    provider =
+                        OAuth2Auth::with_refresh(provider.access_token.clone(), refresh.clone());
                 }
                 Box::new(provider)
             }
@@ -181,8 +188,14 @@ impl RequestExecutor {
             AuthType::AwsSigV4 => {
                 let access_key = config.get("access_key").cloned().unwrap_or_default();
                 let secret_key = config.get("secret_key").cloned().unwrap_or_default();
-                let region = config.get("region").cloned().unwrap_or_else(|| "us-east-1".to_string());
-                let service = config.get("service").cloned().unwrap_or_else(|| "execute-api".to_string());
+                let region = config
+                    .get("region")
+                    .cloned()
+                    .unwrap_or_else(|| "us-east-1".to_string());
+                let service = config
+                    .get("service")
+                    .cloned()
+                    .unwrap_or_else(|| "execute-api".to_string());
                 let mut signer = crate::auth::aws_sig_v4::AwsSigV4Auth::new(access_key, secret_key)
                     .with_region(region)
                     .with_service(service);
@@ -206,10 +219,9 @@ impl RequestExecutor {
         let start = Instant::now();
 
         // Build the request
-        let mut req_builder = self.client.request(
-            Self::to_reqwest_method(request.method),
-            &request.url,
-        );
+        let mut req_builder = self
+            .client
+            .request(Self::to_reqwest_method(request.method), &request.url);
 
         // Add headers
         for header in &request.headers {
@@ -244,18 +256,15 @@ impl RequestExecutor {
         }
 
         // Send the request
-        let response = req_builder
-            .send()
-            .await
-            .map_err(|e| {
-                if e.is_timeout() {
-                    Error::Timeout
-                } else if e.is_connect() {
-                    Error::connection(e.to_string())
-                } else {
-                    Error::Http(e)
-                }
-            })?;
+        let response = req_builder.send().await.map_err(|e| {
+            if e.is_timeout() {
+                Error::Timeout
+            } else if e.is_connect() {
+                Error::connection(e.to_string())
+            } else {
+                Error::Http(e)
+            }
+        })?;
 
         let total_ms = start.elapsed().as_millis() as u64;
 
@@ -329,8 +338,9 @@ impl RequestExecutor {
             HttpMethod::Options => reqwest::Method::OPTIONS,
             HttpMethod::Trace => reqwest::Method::TRACE,
             HttpMethod::Connect => reqwest::Method::CONNECT,
-            HttpMethod::Custom(s) => reqwest::Method::from_bytes(s.as_bytes())
-                .unwrap_or(reqwest::Method::GET),
+            HttpMethod::Custom(s) => {
+                reqwest::Method::from_bytes(s.as_bytes()).unwrap_or(reqwest::Method::GET)
+            }
         }
     }
 

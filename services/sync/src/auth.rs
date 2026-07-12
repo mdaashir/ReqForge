@@ -19,7 +19,12 @@ pub struct Claims {
     pub email: Option<String>,
 }
 
-pub fn issue_token(secret: &str, sub: &str, email: Option<&str>, ttl_secs: i64) -> ServerResult<String> {
+pub fn issue_token(
+    secret: &str,
+    sub: &str,
+    email: Option<&str>,
+    ttl_secs: i64,
+) -> ServerResult<String> {
     if secret.len() < 32 {
         return Err(ServerError::Auth(
             "JWT secret must be at least 32 bytes".into(),
@@ -39,8 +44,7 @@ pub fn issue_token(secret: &str, sub: &str, email: Option<&str>, ttl_secs: i64) 
         &Header::default(),
         &claims,
         &EncodingKey::from_secret(secret.as_bytes()),
-    )
-?;
+    )?;
     Ok(token)
 }
 

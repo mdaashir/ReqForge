@@ -211,8 +211,8 @@ impl SqliteHistoryStorage {
         let conn = self.conn.clone();
         tokio::task::spawn_blocking(move || -> Result<()> {
             let conn = conn.blocking_lock();
-            let cutoff_ms = (chrono::Utc::now().timestamp_millis())
-                - (max_age_days as i64 * 86_400 * 1000);
+            let cutoff_ms =
+                (chrono::Utc::now().timestamp_millis()) - (max_age_days as i64 * 86_400 * 1000);
             conn.execute(
                 "DELETE FROM history WHERE timestamp < ?1",
                 params![cutoff_ms],
@@ -312,7 +312,11 @@ mod tests {
             url: "https://api.example.com/users".into(),
             headers: vec![],
             params: vec![],
-            body: crate::request::Body { mode: BodyMode::None, content: String::new(), content_type: None },
+            body: crate::request::Body {
+                mode: BodyMode::None,
+                content: String::new(),
+                content_type: None,
+            },
             auth: None,
             settings: Default::default(),
             pre_request_script: None,
@@ -358,11 +362,17 @@ mod tests {
 
         let mut req = sample_request();
         req.url = "https://api.example.com/users".into();
-        store.append(HistoryEntry::from_response(req, sample_response())).await.unwrap();
+        store
+            .append(HistoryEntry::from_response(req, sample_response()))
+            .await
+            .unwrap();
 
         let mut req = sample_request();
         req.url = "https://api.example.com/posts".into();
-        store.append(HistoryEntry::from_response(req, sample_response())).await.unwrap();
+        store
+            .append(HistoryEntry::from_response(req, sample_response()))
+            .await
+            .unwrap();
 
         let results = store.search("users", 10).await.unwrap();
         assert_eq!(results.len(), 1);
@@ -373,7 +383,13 @@ mod tests {
     async fn test_clear() {
         let tmp = TempDir::new().unwrap();
         let store = SqliteHistoryStorage::open(tmp.path()).await.unwrap();
-        store.append(HistoryEntry::from_response(sample_request(), sample_response())).await.unwrap();
+        store
+            .append(HistoryEntry::from_response(
+                sample_request(),
+                sample_response(),
+            ))
+            .await
+            .unwrap();
         store.clear().await.unwrap();
         let n = store.count().await.unwrap();
         assert_eq!(n, 0);
@@ -384,8 +400,20 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         let store = SqliteHistoryStorage::open(tmp.path()).await.unwrap();
         assert_eq!(store.count().await.unwrap(), 0);
-        store.append(HistoryEntry::from_response(sample_request(), sample_response())).await.unwrap();
-        store.append(HistoryEntry::from_response(sample_request(), sample_response())).await.unwrap();
+        store
+            .append(HistoryEntry::from_response(
+                sample_request(),
+                sample_response(),
+            ))
+            .await
+            .unwrap();
+        store
+            .append(HistoryEntry::from_response(
+                sample_request(),
+                sample_response(),
+            ))
+            .await
+            .unwrap();
         assert_eq!(store.count().await.unwrap(), 2);
     }
 }

@@ -82,8 +82,7 @@ impl Catalog {
                 let matches_query = q.is_empty()
                     || e.name.to_lowercase().contains(&q)
                     || e.id.to_lowercase().contains(&q)
-                    || e
-                        .description
+                    || e.description
                         .as_deref()
                         .map(|d| d.to_lowercase().contains(&q))
                         .unwrap_or(false);

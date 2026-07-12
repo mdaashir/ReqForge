@@ -6,8 +6,8 @@
 use crate::collection::model::{Collection, CollectionItem};
 use crate::environment::VariableResolver;
 use crate::error::Result;
-use crate::request::RequestExecutor;
 use crate::request::Request;
+use crate::request::RequestExecutor;
 use crate::testing::{Assertion, TestResult, TestRunner, TestStatus};
 use std::collections::HashMap;
 
@@ -96,7 +96,11 @@ impl CollectionRunner {
                 .await;
             results.push(r);
         }
-        Ok(CollectionRunSummary::new(collection, results, start.elapsed().as_millis() as u64))
+        Ok(CollectionRunSummary::new(
+            collection,
+            results,
+            start.elapsed().as_millis() as u64,
+        ))
     }
 
     async fn run_single(
@@ -124,18 +128,26 @@ impl CollectionRunner {
             }
         }
 
-        let result = self.executor.execute_with_resolver(req.clone(), &resolver).await;
+        let result = self
+            .executor
+            .execute_with_resolver(req.clone(), &resolver)
+            .await;
 
         match result {
             Ok(response) => {
                 let duration_ms = req_start.elapsed().as_millis() as u64;
-                let test_result = test_runner.as_ref().map(|tr| tr.run(&response).unwrap_or_else(|_| TestResult {
-                    name: name.to_string(),
-                    status: TestStatus::Error,
-                    assertions: vec![],
-                    duration_ms,
-                }));
-                let _passed = test_result.as_ref().map(|t| matches!(t.status, TestStatus::Passed)).unwrap_or(true);
+                let test_result = test_runner.as_ref().map(|tr| {
+                    tr.run(&response).unwrap_or_else(|_| TestResult {
+                        name: name.to_string(),
+                        status: TestStatus::Error,
+                        assertions: vec![],
+                        duration_ms,
+                    })
+                });
+                let _passed = test_result
+                    .as_ref()
+                    .map(|t| matches!(t.status, TestStatus::Passed))
+                    .unwrap_or(true);
 
                 CollectionRunResult {
                     request_id: id.to_string(),

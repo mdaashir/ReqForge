@@ -34,7 +34,10 @@ impl HttpMethod {
     }
 
     pub fn is_safe(&self) -> bool {
-        matches!(self, HttpMethod::Get | HttpMethod::Head | HttpMethod::Options)
+        matches!(
+            self,
+            HttpMethod::Get | HttpMethod::Head | HttpMethod::Options
+        )
     }
 }
 

@@ -135,17 +135,29 @@ async fn main() -> Result<()> {
             collection,
             request,
             env,
-        } => commands::run::execute(&cli.workspace, &collection, request.as_deref(), env.as_deref(), cli.format).await,
+        } => {
+            commands::run::execute(
+                &cli.workspace,
+                &collection,
+                request.as_deref(),
+                env.as_deref(),
+                cli.format,
+            )
+            .await
+        }
         Commands::List => commands::list::execute(&cli.workspace, cli.format).await,
         Commands::Validate => commands::validate::execute(&cli.workspace, cli.format).await,
         Commands::Info => commands::info::execute(&cli.workspace, cli.format).await,
-        Commands::Mock { port } => {
-            commands::mock::execute(&cli.workspace, Some(port)).await
-        }
+        Commands::Mock { port } => commands::mock::execute(&cli.workspace, Some(port)).await,
         Commands::Import { file, format, name } => {
-            commands::import_::execute(&cli.workspace, &file, format.as_deref(), name.as_deref()).await
+            commands::import_::execute(&cli.workspace, &file, format.as_deref(), name.as_deref())
+                .await
         }
-        Commands::Export { collection, format, output } => {
+        Commands::Export {
+            collection,
+            format,
+            output,
+        } => {
             commands::export::execute(&cli.workspace, &collection, &format, output.as_deref()).await
         }
         Commands::Test { collection, env } => {

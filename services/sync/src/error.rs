@@ -53,10 +53,12 @@ impl IntoResponse for ServerError {
             ServerError::NotFound => (StatusCode::NOT_FOUND, "not found".into()),
             ServerError::BadRequest(_) => (StatusCode::BAD_REQUEST, self.to_string()),
             ServerError::PayloadTooLarge => (StatusCode::PAYLOAD_TOO_LARGE, self.to_string()),
-            ServerError::Io(_) | ServerError::Db(_) | ServerError::Jwt(_) | ServerError::AddrParse(_) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "storage failure".into(),
-            ),
+            ServerError::Io(_)
+            | ServerError::Db(_)
+            | ServerError::Jwt(_)
+            | ServerError::AddrParse(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "storage failure".into())
+            }
         };
         (status, Json(json!({ "error": message }))).into_response()
     }

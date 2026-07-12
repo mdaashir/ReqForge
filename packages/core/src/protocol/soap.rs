@@ -156,12 +156,7 @@ impl SoapHandler {
 
     /// Build a SOAP envelope for the given method name and payload.
     /// If a WSDL is loaded, tries to resolve the correct SOAP action.
-    pub fn build_envelope(
-        &self,
-        method: &str,
-        namespace: &str,
-        payload: &str,
-    ) -> Result<String> {
+    pub fn build_envelope(&self, method: &str, namespace: &str, payload: &str) -> Result<String> {
         let envelope = format!(
             r#"<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
@@ -344,8 +339,7 @@ impl ProtocolHandler for SoapHandler {
 pub fn parse_wsdl(input: &str) -> Result<WsdlDocument> {
     // Use string parsing for WSDL since it's schema-heavy and quick-xml
     // attribute-level handling is complex. This is a heuristic parser.
-    let target_ns = extract_attribute(input, "targetNamespace")
-        .unwrap_or_default();
+    let target_ns = extract_attribute(input, "targetNamespace").unwrap_or_default();
 
     let services = parse_services(input);
     let bindings = parse_bindings(input);
@@ -412,10 +406,7 @@ fn extract_block<'a>(xml: &'a str, tag: &str) -> Vec<&'a str> {
         format!("<wsdl:{} ", tag),
         format!("<wsdl:{}>", tag),
     ];
-    let close_tags = [
-        format!("</{}>", tag),
-        format!("</wsdl:{}>", tag),
-    ];
+    let close_tags = [format!("</{}>", tag), format!("</wsdl:{}>", tag)];
     loop {
         let mut found = None;
         for ot in &open_tags {
@@ -497,11 +488,16 @@ fn parse_bindings(xml: &str) -> Vec<WsdlBinding> {
             let soap_action = extract_attribute(op_block, "soapAction")
                 .or_else(|| extract_attribute(op_block, &format!("{}soapAction", soap_ns)))
                 .unwrap_or_default();
-            let op_style = extract_attribute(op_block, &format!("{}style", soap_ns)).unwrap_or_default();
+            let op_style =
+                extract_attribute(op_block, &format!("{}style", soap_ns)).unwrap_or_default();
             operations.push(WsdlOperationBinding {
                 name: op_name,
                 soap_action,
-                style: if op_style.is_empty() { style.clone() } else { op_style },
+                style: if op_style.is_empty() {
+                    style.clone()
+                } else {
+                    op_style
+                },
             });
         }
         bindings.push(WsdlBinding {
@@ -525,11 +521,15 @@ fn parse_port_types(xml: &str) -> Vec<WsdlPortType> {
             let input = if op_block.contains("<input ") || op_block.contains("<input>") {
                 extract_attribute(op_block, "message")
                     .map(|s| s.split(':').next_back().unwrap_or(&s).to_string())
-            } else { None };
+            } else {
+                None
+            };
             let output = if op_block.contains("<output ") || op_block.contains("<output>") {
                 extract_attribute(op_block, "message")
                     .map(|s| s.split(':').next_back().unwrap_or(&s).to_string())
-            } else { None };
+            } else {
+                None
+            };
             operations.push(WsdlOperation {
                 name: op_name,
                 input,
@@ -554,7 +554,8 @@ fn parse_messages(xml: &str) -> Vec<WsdlMessage> {
                 parts.push(WsdlPart {
                     name: pn,
                     element: element.map(|s| s.split(':').next_back().unwrap_or(&s).to_string()),
-                    type_name: type_name.map(|s| s.split(':').next_back().unwrap_or(&s).to_string()),
+                    type_name: type_name
+                        .map(|s| s.split(':').next_back().unwrap_or(&s).to_string()),
                 });
             }
         }
@@ -570,12 +571,12 @@ fn derive_action_from_body(body: &str) -> Option<String> {
     // Look for namespace-prefixed tag in the body
     for prefix in &["tns:", "ns1:", "web:", "", "soap:"] {
         for s in body.split('<') {
-            if s.starts_with(prefix) && !s.starts_with("soap:") && !s.starts_with("?xml") && !s.starts_with('/') {
-                let name = s
-                    .split([' ', '>', '/'])
-                    .next()
-                    .unwrap_or("")
-                    .to_string();
+            if s.starts_with(prefix)
+                && !s.starts_with("soap:")
+                && !s.starts_with("?xml")
+                && !s.starts_with('/')
+            {
+                let name = s.split([' ', '>', '/']).next().unwrap_or("").to_string();
                 if !name.is_empty() {
                     return Some(name);
                 }
@@ -635,7 +636,9 @@ mod tests {
     #[test]
     fn test_envelope_roundtrip() {
         let handler = SoapHandler::new();
-        let envelope = handler.build_envelope("SayHello", "http://example.com/hello", "<name>World</name>").unwrap();
+        let envelope = handler
+            .build_envelope("SayHello", "http://example.com/hello", "<name>World</name>")
+            .unwrap();
         // Verify well-formedness
         assert!(envelope.starts_with("<?xml"));
         assert!(envelope.contains("</soap:Envelope>"));
@@ -652,9 +655,15 @@ mod tests {
         assert_eq!(doc.port_types[0].operations.len(), 1);
         assert_eq!(doc.port_types[0].operations[0].name, "GetTemp");
         assert_eq!(doc.bindings.len(), 1);
-        assert_eq!(doc.bindings[0].operations[0].soap_action, "http://example.com/weather/GetTemp");
+        assert_eq!(
+            doc.bindings[0].operations[0].soap_action,
+            "http://example.com/weather/GetTemp"
+        );
         assert_eq!(doc.services.len(), 1);
-        assert_eq!(doc.services[0].ports[0].address, "http://example.com/weather.asmx");
+        assert_eq!(
+            doc.services[0].ports[0].address,
+            "http://example.com/weather.asmx"
+        );
     }
 
     #[test]
@@ -662,7 +671,10 @@ mod tests {
         let mut handler = SoapHandler::new();
         handler.load_wsdl(SAMPLE_WSDL).unwrap();
         let action = handler.resolve_soap_action("GetTemp");
-        assert_eq!(action, Some("http://example.com/weather/GetTemp".to_string()));
+        assert_eq!(
+            action,
+            Some("http://example.com/weather/GetTemp".to_string())
+        );
     }
 
     #[test]

@@ -36,7 +36,11 @@ pub struct TestResult {
 }
 
 impl TestResult {
-    pub fn passed(name: impl Into<String>, assertions: Vec<AssertionResult>, duration_ms: u64) -> Self {
+    pub fn passed(
+        name: impl Into<String>,
+        assertions: Vec<AssertionResult>,
+        duration_ms: u64,
+    ) -> Self {
         Self {
             name: name.into(),
             status: TestStatus::Passed,
@@ -45,7 +49,11 @@ impl TestResult {
         }
     }
 
-    pub fn failed(name: impl Into<String>, assertions: Vec<AssertionResult>, duration_ms: u64) -> Self {
+    pub fn failed(
+        name: impl Into<String>,
+        assertions: Vec<AssertionResult>,
+        duration_ms: u64,
+    ) -> Self {
         Self {
             name: name.into(),
             status: TestStatus::Failed,
@@ -114,25 +122,29 @@ impl TestRunner {
                     match storage.match_or_update(request_id, &body_text) {
                         Ok(true) => {
                             results.push(AssertionResult::passed(format!(
-                                "Snapshot '{}' matches", request_id
+                                "Snapshot '{}' matches",
+                                request_id
                             )));
                         }
                         Ok(false) => {
                             all_passed = false;
                             results.push(AssertionResult::failed(format!(
-                                "Snapshot '{}' differs from golden", request_id
+                                "Snapshot '{}' differs from golden",
+                                request_id
                             )));
                         }
                         Err(e) => {
                             all_passed = false;
                             results.push(AssertionResult::failed(format!(
-                                "Snapshot '{}': {}", request_id, e
+                                "Snapshot '{}': {}",
+                                request_id, e
                             )));
                         }
                     }
                 } else {
                     results.push(AssertionResult::passed(format!(
-                        "Snapshot '{}' — no storage configured, skipped", request_id
+                        "Snapshot '{}' — no storage configured, skipped",
+                        request_id
                     )));
                 }
             }
@@ -244,7 +256,8 @@ mod tests {
         let runner = TestRunner::new("Schema test").add(Assertion::new(
             "Schema",
             AssertionType::JsonSchema {
-                schema: r#"{"type": "object", "properties": {"id": {"type": "number"}}}"#.to_string(),
+                schema: r#"{"type": "object", "properties": {"id": {"type": "number"}}}"#
+                    .to_string(),
             },
         ));
         let response = make_response(200, r#"{"id": 42}"#);

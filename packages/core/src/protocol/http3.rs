@@ -96,15 +96,15 @@ impl Http3Handler {
 
         // Forward body for mutating methods.
         let body = request.body.content.clone();
-        if !matches!(request.method, crate::request::HttpMethod::Get | crate::request::HttpMethod::Head) {
+        if !matches!(
+            request.method,
+            crate::request::HttpMethod::Get | crate::request::HttpMethod::Head
+        ) {
             req_builder = req_builder.body(body);
         }
 
         let started = std::time::Instant::now();
-        let resp = req_builder
-            .send()
-            .await
-            .map_err(|e| Error::Http(e))?;
+        let resp = req_builder.send().await.map_err(|e| Error::Http(e))?;
 
         let status = resp.status();
         let mut headers = std::collections::HashMap::new();

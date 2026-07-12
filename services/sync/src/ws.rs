@@ -156,6 +156,9 @@ async fn run_sync_session(socket: WebSocket, doc_id: &str) {
         }
     }
 
-    let snapshot = { let txn = doc.transact(); txn.encode_state_as_update_v1(&yrs::StateVector::default()) };
+    let snapshot = {
+        let txn = doc.transact();
+        txn.encode_state_as_update_v1(&yrs::StateVector::default())
+    };
     let _ = snapshot;
 }

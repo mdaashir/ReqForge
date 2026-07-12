@@ -64,10 +64,7 @@ pub async fn execute(workspace: &str, format: OutputFormat) -> Result<()> {
 
     output::print_header("Result", format);
     if format == OutputFormat::Human {
-        println!(
-            "  {}/{} collections valid",
-            report.valid, report.total
-        );
+        println!("  {}/{} collections valid", report.valid, report.total);
     } else {
         output::print_json(&report)?;
     }
@@ -93,9 +90,7 @@ fn validate_collection(c: &reqforge_core::Collection) -> anyhow::Result<()> {
                 reqforge_core::collection::CollectionItem::Folder { children, .. } => {
                     walk(children)?;
                 }
-                reqforge_core::collection::CollectionItem::Request {
-                    name, request, ..
-                } => {
+                reqforge_core::collection::CollectionItem::Request { name, request, .. } => {
                     if name.trim().is_empty() {
                         anyhow::bail!("Request has empty name");
                     }

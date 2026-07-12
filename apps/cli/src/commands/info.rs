@@ -26,7 +26,8 @@ pub async fn execute(workspace: &str, format: OutputFormat) -> Result<()> {
         .context("Failed to read workspace collections")?;
 
     let info = WorkspaceInfo {
-        workspace_path: path.canonicalize()
+        workspace_path: path
+            .canonicalize()
             .map(|p| p.display().to_string())
             .unwrap_or_else(|_| workspace.to_string()),
         exists,
@@ -39,7 +40,10 @@ pub async fn execute(workspace: &str, format: OutputFormat) -> Result<()> {
     } else {
         output::print_header("Workspace Info", format);
         println!("  Path:          {}", info.workspace_path);
-        println!("  Initialised:   {}", if info.exists { "yes" } else { "no" });
+        println!(
+            "  Initialised:   {}",
+            if info.exists { "yes" } else { "no" }
+        );
         println!("  Collections:   {}", info.collection_count);
         if !info.collections.is_empty() {
             println!();

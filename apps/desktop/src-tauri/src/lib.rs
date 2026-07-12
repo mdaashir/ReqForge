@@ -1,17 +1,19 @@
 use reqforge_core::collection::CollectionStorage;
 use reqforge_core::environment::{Environment, EnvironmentStorage};
 use reqforge_core::history::{HistoryEntry, HistoryStorage};
-use reqforge_core::import::{BrunoImporter, CurlImporter, Importer, InsomniaImporter, PostmanImporter};
-use reqforge_core::{Collection, HttpHandler, ProtocolHandler, Result as CoreResult};
+use reqforge_core::import::{
+    BrunoImporter, CurlImporter, Importer, InsomniaImporter, PostmanImporter,
+};
 use reqforge_core::request::{Request as CoreRequest, Response as CoreResponse};
 use reqforge_core::testing::{Assertion, AssertionType, TestRunner, TestStatus};
+use reqforge_core::{Collection, HttpHandler, ProtocolHandler, Result as CoreResult};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::command;
 
-mod oauth;
 mod keychain;
+mod oauth;
 
 /// Application state shared across Tauri commands
 pub struct AppState {
@@ -39,8 +41,7 @@ impl AppState {
             .as_ref()
             .ok_or_else(|| reqforge_core::Error::config("Workspace not initialised"))?;
         let env_dir = root.join("environments");
-        EnvironmentStorage::new(env_dir)
-            .map_err(|e| reqforge_core::Error::other(e.to_string()))
+        EnvironmentStorage::new(env_dir).map_err(|e| reqforge_core::Error::other(e.to_string()))
     }
 }
 
@@ -142,7 +143,9 @@ impl From<TestAssertionPayload> for AssertionType {
             TestAssertionPayload::JsonPath { path, expected } => {
                 AssertionType::JsonPath { path, expected }
             }
-            TestAssertionPayload::ContentType { expected } => AssertionType::ContentType { expected },
+            TestAssertionPayload::ContentType { expected } => {
+                AssertionType::ContentType { expected }
+            }
         }
     }
 }
@@ -216,10 +219,7 @@ async fn save_collection(
 }
 
 #[command]
-async fn load_collection(
-    state: tauri::State<'_, AppState>,
-    id: String,
-) -> CoreResult<Collection> {
+async fn load_collection(state: tauri::State<'_, AppState>, id: String) -> CoreResult<Collection> {
     let storage = state.storage()?;
     storage.load(&id).await
 }
@@ -231,10 +231,7 @@ async fn list_collections(state: tauri::State<'_, AppState>) -> CoreResult<Vec<C
 }
 
 #[command]
-async fn delete_collection(
-    state: tauri::State<'_, AppState>,
-    id: String,
-) -> CoreResult<()> {
+async fn delete_collection(state: tauri::State<'_, AppState>, id: String) -> CoreResult<()> {
     let storage = state.storage()?;
     storage.delete(&id).await
 }
@@ -335,10 +332,7 @@ async fn clear_history(state: tauri::State<'_, AppState>) -> CoreResult<()> {
 /// Replay a request from history. Returns the original request so the
 /// frontend can re-send it via the existing `send_request` command.
 #[command]
-async fn replay_history(
-    state: tauri::State<'_, AppState>,
-    id: String,
-) -> CoreResult<CoreRequest> {
+async fn replay_history(state: tauri::State<'_, AppState>, id: String) -> CoreResult<CoreRequest> {
     let root = state.workspace_root.lock().unwrap().clone();
     let root = root.ok_or_else(|| reqforge_core::Error::config("Workspace not initialised"))?;
     let storage = HistoryStorage::new(root);
@@ -359,28 +353,36 @@ async fn replay_history(
 #[command]
 fn save_environment(state: tauri::State<'_, AppState>, env: Environment) -> CoreResult<()> {
     let storage = state.env_storage()?;
-    storage.save(&env).map_err(|e| reqforge_core::Error::other(e.to_string()))
+    storage
+        .save(&env)
+        .map_err(|e| reqforge_core::Error::other(e.to_string()))
 }
 
 /// Load an environment from disk
 #[command]
 fn load_environment(state: tauri::State<'_, AppState>, name: String) -> CoreResult<Environment> {
     let storage = state.env_storage()?;
-    storage.load(&name).map_err(|e| reqforge_core::Error::other(e.to_string()))
+    storage
+        .load(&name)
+        .map_err(|e| reqforge_core::Error::other(e.to_string()))
 }
 
 /// List all available environments
 #[command]
 fn list_environments(state: tauri::State<'_, AppState>) -> CoreResult<Vec<String>> {
     let storage = state.env_storage()?;
-    storage.list().map_err(|e| reqforge_core::Error::other(e.to_string()))
+    storage
+        .list()
+        .map_err(|e| reqforge_core::Error::other(e.to_string()))
 }
 
 /// Delete an environment from disk
 #[command]
 fn delete_environment(state: tauri::State<'_, AppState>, name: String) -> CoreResult<()> {
     let storage = state.env_storage()?;
-    storage.delete(&name).map_err(|e| reqforge_core::Error::other(e.to_string()))
+    storage
+        .delete(&name)
+        .map_err(|e| reqforge_core::Error::other(e.to_string()))
 }
 
 /// Start the OAuth 2.0 PKCE flow (browser popup + loopback listener).
@@ -393,11 +395,7 @@ async fn start_oauth_flow(
 
 /// Save a credential to the OS keychain.
 #[command]
-async fn keychain_set(
-    workspace_root: String,
-    account: String,
-    value: String,
-) -> CoreResult<()> {
+async fn keychain_set(workspace_root: String, account: String, value: String) -> CoreResult<()> {
     crate::keychain::keychain_set_with_index(workspace_root, account, value)
         .await
         .map_err(reqforge_core::Error::other)

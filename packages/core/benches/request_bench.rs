@@ -87,9 +87,10 @@ fn bench_test_runner(c: &mut Criterion) {
     let response = reqforge_core::request::Response {
         status: 200,
         status_text: "OK".into(),
-        headers: std::collections::HashMap::from([
-            ("content-type".into(), "application/json".into()),
-        ]),
+        headers: std::collections::HashMap::from([(
+            "content-type".into(),
+            "application/json".into(),
+        )]),
         body: reqforge_core::request::ResponseBody {
             content: b"{\"id\":1,\"name\":\"test\"}".to_vec(),
             content_type: Some("application/json".into()),
@@ -116,7 +117,9 @@ fn bench_test_runner(c: &mut Criterion) {
                 })
                 .add(Assertion {
                     name: "body contains id".into(),
-                    assertion: AssertionType::BodyContains { substring: "id".into() },
+                    assertion: AssertionType::BodyContains {
+                        substring: "id".into(),
+                    },
                 })
                 .add(Assertion {
                     name: "header content-type".into(),

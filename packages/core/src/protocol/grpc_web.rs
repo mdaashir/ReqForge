@@ -4,8 +4,8 @@
 //! No streaming support.
 
 use crate::error::Result;
-use crate::protocol::{ProtocolCapabilities, ProtocolHandler};
 use crate::protocol::http::HttpHandler;
+use crate::protocol::{ProtocolCapabilities, ProtocolHandler};
 use crate::request::{Request, Response, ResponseBody};
 use async_trait::async_trait;
 
@@ -36,7 +36,12 @@ impl Backend {
             .headers
             .iter()
             .find(|h| h.key.eq_ignore_ascii_case("grpc-method"))
-            .or_else(|| request.headers.iter().find(|h| h.key.eq_ignore_ascii_case("grpc-service")))
+            .or_else(|| {
+                request
+                    .headers
+                    .iter()
+                    .find(|h| h.key.eq_ignore_ascii_case("grpc-service"))
+            })
             .map(|h| h.value.clone())
             .unwrap_or_else(|| {
                 // Derive from the URL path (strip trailing portion)

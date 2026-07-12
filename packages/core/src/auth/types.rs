@@ -83,11 +83,7 @@ pub struct ApiKeyAuth {
 }
 
 impl ApiKeyAuth {
-    pub fn new(
-        key: impl Into<String>,
-        value: impl Into<String>,
-        location: ApiKeyLocation,
-    ) -> Self {
+    pub fn new(key: impl Into<String>, value: impl Into<String>, location: ApiKeyLocation) -> Self {
         Self {
             key: key.into(),
             value: value.into(),

@@ -43,15 +43,12 @@ pub async fn ingest_usage(
             Json(serde_json::json!({"error": "no events"})),
         ));
     }
-    state
-        .db
-        .insert_usage_events(&events)
-        .map_err(|e| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(serde_json::json!({"error": e.to_string()})),
-            )
-        })?;
+    state.db.insert_usage_events(&events).map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({"error": e.to_string()})),
+        )
+    })?;
     Ok(StatusCode::ACCEPTED)
 }
 
@@ -59,14 +56,11 @@ pub async fn ingest_crash(
     State(state): State<AppState>,
     Json(report): Json<CrashReport>,
 ) -> Result<StatusCode, (StatusCode, Json<serde_json::Value>)> {
-    state
-        .db
-        .insert_crash_report(&report)
-        .map_err(|e| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(serde_json::json!({"error": e.to_string()})),
-            )
-        })?;
+    state.db.insert_crash_report(&report).map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({"error": e.to_string()})),
+        )
+    })?;
     Ok(StatusCode::ACCEPTED)
 }

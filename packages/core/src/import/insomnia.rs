@@ -156,7 +156,9 @@ impl Importer for InsomniaImporter {
         for r in &export.resources {
             let (id, parent_id) = match r {
                 InsomniaResource::RequestGroup { _id, parent_id, .. }
-                | InsomniaResource::Request { _id, parent_id, .. } => (_id.clone(), parent_id.clone()),
+                | InsomniaResource::Request { _id, parent_id, .. } => {
+                    (_id.clone(), parent_id.clone())
+                }
                 _ => continue,
             };
             if let Some(p) = parent_id {
@@ -175,7 +177,9 @@ impl Importer for InsomniaImporter {
         let mut root_children = Vec::new();
         if let Some(child_ids) = folder_children.get(&workspace_id) {
             for cid in child_ids {
-                if let Some(item) = build_folder(cid, &folder_children, &folder_ids, &export.resources) {
+                if let Some(item) =
+                    build_folder(cid, &folder_children, &folder_ids, &export.resources)
+                {
                     root_children.push(item);
                 }
             }
@@ -269,7 +273,9 @@ fn parse(input: &str) -> Result<InsomniaExport> {
     if let Ok(value) = serde_json::from_str::<InsomniaExport>(trimmed) {
         return Ok(value);
     }
-    Err(Error::other("Could not parse Insomnia export (not valid YAML or JSON)"))
+    Err(Error::other(
+        "Could not parse Insomnia export (not valid YAML or JSON)",
+    ))
 }
 
 fn json_to_string(v: &serde_json::Value) -> String {
@@ -409,7 +415,10 @@ fn convert_auth(a: &InsomniaAuth) -> Option<Auth> {
             AuthType::Bearer,
             HashMap::from([
                 ("token".to_string(), token.clone()),
-                ("prefix".to_string(), prefix.clone().unwrap_or_else(|| "Bearer".to_string())),
+                (
+                    "prefix".to_string(),
+                    prefix.clone().unwrap_or_else(|| "Bearer".to_string()),
+                ),
             ]),
         ),
         InsomniaAuth::Basic { username, password } => (

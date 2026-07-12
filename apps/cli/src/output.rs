@@ -2,8 +2,8 @@
 
 use crate::OutputFormat;
 use colored::Colorize;
-use std::fmt::Write;
 use comfy_table::Table;
+use std::fmt::Write;
 
 pub fn print_header(text: &str, format: OutputFormat) {
     match format {

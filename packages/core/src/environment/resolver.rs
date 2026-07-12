@@ -171,8 +171,12 @@ fn rand_int(min: i32, max: i32) -> i32 {
 }
 
 fn random_name() -> String {
-    let first = ["Alex", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Sam", "Drew"];
-    let last = ["Smith", "Jones", "Brown", "Wilson", "Davis", "Miller", "Lee", "Garcia"];
+    let first = [
+        "Alex", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Sam", "Drew",
+    ];
+    let last = [
+        "Smith", "Jones", "Brown", "Wilson", "Davis", "Miller", "Lee", "Garcia",
+    ];
     let f = first[rand_int(0, first.len() as i32) as usize];
     let l = last[rand_int(0, last.len() as i32) as usize];
     format!("{} {}", f, l)
@@ -186,7 +190,10 @@ mod tests {
     fn test_simple_resolution() {
         let mut r = VariableResolver::new();
         r.set_local("base_url", "https://api.example.com");
-        assert_eq!(r.resolve("{{base_url}}/users").unwrap(), "https://api.example.com/users");
+        assert_eq!(
+            r.resolve("{{base_url}}/users").unwrap(),
+            "https://api.example.com/users"
+        );
     }
 
     #[test]

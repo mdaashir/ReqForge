@@ -122,7 +122,10 @@ impl TelemetryClient {
 
         let resp = self
             .client
-            .post(format!("{}/v1/usage", self.config.endpoint.trim_end_matches('/')))
+            .post(format!(
+                "{}/v1/usage",
+                self.config.endpoint.trim_end_matches('/')
+            ))
             .json(&events)
             .send()
             .await
@@ -141,7 +144,10 @@ impl TelemetryClient {
         }
         let resp = self
             .client
-            .post(format!("{}/v1/crash", self.config.endpoint.trim_end_matches('/')))
+            .post(format!(
+                "{}/v1/crash",
+                self.config.endpoint.trim_end_matches('/')
+            ))
             .json(&report)
             .send()
             .await

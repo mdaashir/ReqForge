@@ -143,7 +143,10 @@ impl ScriptRuntime {
     fn make_response_obj(&self, resp: &Response) -> Dynamic {
         let mut m = Map::new();
         m.insert("status".into(), Dynamic::from(resp.status as i64));
-        m.insert("status_text".into(), Dynamic::from(resp.status_text.clone()));
+        m.insert(
+            "status_text".into(),
+            Dynamic::from(resp.status_text.clone()),
+        );
         m.insert(
             "headers".into(),
             Dynamic::from_map(
@@ -153,13 +156,7 @@ impl ScriptRuntime {
                     .collect(),
             ),
         );
-        m.insert(
-            "body".into(),
-            Dynamic::from(
-                resp.body
-                    .text()
-            ),
-        );
+        m.insert("body".into(), Dynamic::from(resp.body.text()));
         m.into()
     }
 
@@ -176,9 +173,7 @@ impl ScriptRuntime {
     }
 
     fn extract_request(&self, scope: &Scope, original: &Request) -> Result<Request> {
-        let rf = scope
-            .get_value::<Dynamic>("rf")
-            .unwrap_or(Dynamic::UNIT);
+        let rf = scope.get_value::<Dynamic>("rf").unwrap_or(Dynamic::UNIT);
         let req_map = rf
             .try_cast::<Map>()
             .and_then(|mut m| m.remove("request"))
@@ -190,7 +185,10 @@ impl ScriptRuntime {
 
         let mut req = original.clone();
 
-        if let Some(method) = map.get("method").and_then(|d| d.clone().try_cast::<String>()) {
+        if let Some(method) = map
+            .get("method")
+            .and_then(|d| d.clone().try_cast::<String>())
+        {
             if let Ok(m) = method.parse::<HttpMethod>() {
                 req.method = m;
             }
@@ -245,7 +243,11 @@ mod tests {
             status: 200,
             status_text: "OK".into(),
             headers: [("content-type".into(), "application/json".into())].into(),
-            body: ResponseBody { content: br#"{"id":1,"name":"Alice"}"#.to_vec(), content_type: None, is_text: true },
+            body: ResponseBody {
+                content: br#"{"id":1,"name":"Alice"}"#.to_vec(),
+                content_type: None,
+                is_text: true,
+            },
             cookies: vec![],
             timing: Default::default(),
             size: Default::default(),
@@ -280,7 +282,12 @@ mod tests {
         let env = HashMap::new();
         let result = rt.run_pre_request(script, &sample_request(), &env).unwrap();
         assert_eq!(
-            result.request.headers.iter().find(|h| h.key == "X-Custom").map(|h| h.value.as_str()),
+            result
+                .request
+                .headers
+                .iter()
+                .find(|h| h.key == "X-Custom")
+                .map(|h| h.value.as_str()),
             Some("foobar")
         );
     }
@@ -290,7 +297,9 @@ mod tests {
         let rt = ScriptRuntime::new();
         let script = r#"let s = rf.response.status; log(`status is ${s}`);"#;
         let env = HashMap::new();
-        let result = rt.run_post_response(script, &sample_request(), &sample_response(), &env).unwrap();
+        let result = rt
+            .run_post_response(script, &sample_request(), &sample_response(), &env)
+            .unwrap();
         assert!(result.body.is_none());
     }
 

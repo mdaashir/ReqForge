@@ -108,7 +108,9 @@ impl Collection {
         fn find<'a>(items: &'a [CollectionItem], id: &str) -> Option<&'a Request> {
             for item in items {
                 match item {
-                    CollectionItem::Request { id: rid, request, .. } if rid == id => {
+                    CollectionItem::Request {
+                        id: rid, request, ..
+                    } if rid == id => {
                         return Some(request);
                     }
                     CollectionItem::Request { .. } => {}
@@ -129,7 +131,9 @@ impl Collection {
         fn find<'a>(items: &'a mut [CollectionItem], id: &str) -> Option<&'a mut Request> {
             for item in items {
                 match item {
-                    CollectionItem::Request { id: rid, request, .. } if rid == id => {
+                    CollectionItem::Request {
+                        id: rid, request, ..
+                    } if rid == id => {
                         return Some(request);
                     }
                     CollectionItem::Request { .. } => {}

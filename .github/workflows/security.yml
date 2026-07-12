@@ -13,7 +13,7 @@ jobs:
     name: cargo audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install cargo-audit
         run: cargo install cargo-audit --locked
       - run: cargo audit --manifest-path packages/core/Cargo.toml
@@ -22,7 +22,7 @@ jobs:
     name: npm audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: "20"

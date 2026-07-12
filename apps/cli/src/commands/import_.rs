@@ -34,7 +34,11 @@ pub async fn execute(
     let storage = CollectionStorage::new(workspace_path);
     storage.save(&collection).await?;
 
-    println!("Imported: {} ({} requests)", collection.name, collection.request_count());
+    println!(
+        "Imported: {} ({} requests)",
+        collection.name,
+        collection.request_count()
+    );
     println!("  ID: {}", collection.id);
     Ok(())
 }

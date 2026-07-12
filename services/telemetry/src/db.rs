@@ -70,10 +70,7 @@ impl Db {
         Ok(())
     }
 
-    pub fn insert_crash_report(
-        &self,
-        report: &crate::routes::CrashReport,
-    ) -> rusqlite::Result<()> {
+    pub fn insert_crash_report(&self, report: &crate::routes::CrashReport) -> rusqlite::Result<()> {
         let conn = self.conn.lock().unwrap();
         conn.execute(
             "INSERT INTO crash_reports (app_version, os, message, email, stack, crashed_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",

@@ -77,10 +77,7 @@ pub enum PluginPermission {
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum PluginMessage {
     /// Plugin handshake initiated by the host on load.
-    Init {
-        plugin_id: String,
-        abi_version: u32,
-    },
+    Init { plugin_id: String, abi_version: u32 },
     /// Fired before a request is sent.
     OnRequest {
         request_id: String,

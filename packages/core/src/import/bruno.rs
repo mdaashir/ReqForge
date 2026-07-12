@@ -79,11 +79,10 @@ impl ParsedBru {
         let body = build_body(self.body_mode.as_deref(), self.body_text.as_deref())?;
         let auth = build_auth(&self);
 
-        let name = self.name.clone().unwrap_or_else(|| {
-            self.url
-                .clone()
-                .unwrap_or_else(|| "Untitled".to_string())
-        });
+        let name = self
+            .name
+            .clone()
+            .unwrap_or_else(|| self.url.clone().unwrap_or_else(|| "Untitled".to_string()));
 
         Ok(Request {
             id: uuid::Uuid::new_v4().to_string(),
@@ -109,9 +108,10 @@ fn build_body(mode: Option<&str>, text: Option<&str>) -> Result<Body> {
         "json" => (Some("application/json".to_string()), BodyMode::Json),
         "xml" => (Some("application/xml".to_string()), BodyMode::Xml),
         "text" => (Some("text/plain".to_string()), BodyMode::Text),
-        "formUrlEncoded" => {
-            (Some("application/x-www-form-urlencoded".to_string()), BodyMode::Form)
-        }
+        "formUrlEncoded" => (
+            Some("application/x-www-form-urlencoded".to_string()),
+            BodyMode::Form,
+        ),
         "multipartForm" => (Some("multipart/form-data".to_string()), BodyMode::Multipart),
         "graphql" => (Some("application/json".to_string()), BodyMode::Graphql),
         "none" | "" => (None, BodyMode::None),
@@ -134,18 +134,33 @@ fn build_auth(parsed: &ParsedBru) -> Option<Auth> {
     let mut config = std::collections::HashMap::new();
     let atype = match auth_type {
         "bearer" => {
-            config.insert("token".to_string(), parsed.auth_token.clone().unwrap_or_default());
+            config.insert(
+                "token".to_string(),
+                parsed.auth_token.clone().unwrap_or_default(),
+            );
             config.insert("prefix".to_string(), "Bearer".to_string());
             AuthType::Bearer
         }
         "basic" => {
-            config.insert("username".to_string(), parsed.auth_user.clone().unwrap_or_default());
-            config.insert("password".to_string(), parsed.auth_pass.clone().unwrap_or_default());
+            config.insert(
+                "username".to_string(),
+                parsed.auth_user.clone().unwrap_or_default(),
+            );
+            config.insert(
+                "password".to_string(),
+                parsed.auth_pass.clone().unwrap_or_default(),
+            );
             AuthType::Basic
         }
         "apikey" => {
-            config.insert("key".to_string(), parsed.auth_key.clone().unwrap_or_default());
-            config.insert("value".to_string(), parsed.auth_value.clone().unwrap_or_default());
+            config.insert(
+                "key".to_string(),
+                parsed.auth_key.clone().unwrap_or_default(),
+            );
+            config.insert(
+                "value".to_string(),
+                parsed.auth_value.clone().unwrap_or_default(),
+            );
             config.insert(
                 "location".to_string(),
                 match parsed.auth_in.as_deref() {
@@ -198,7 +213,8 @@ fn parse_bru(input: &str) -> Result<ParsedBru> {
             None => {
                 return Err(Error::other(format!(
                     "Unclosed Bruno block `{}` at line {}",
-                    header, i + 1
+                    header,
+                    i + 1
                 )));
             }
         };

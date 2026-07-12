@@ -41,10 +41,7 @@ impl FileWatcher {
     ///
     /// `auto_commit` — if true, auto-commit changes to git after a brief
     /// debounce (500ms). Requires the workspace to be inside a git repo.
-    pub fn start(
-        workspace: &Path,
-        auto_commit: bool,
-    ) -> Result<Self> {
+    pub fn start(workspace: &Path, auto_commit: bool) -> Result<Self> {
         let (tx, rx) = mpsc::channel(256);
 
         let workspace = workspace.to_path_buf();
@@ -114,7 +111,9 @@ impl FileWatcher {
             if let Ok(git_lock) = inner.git.lock() {
                 if let Some(ref repo) = *git_lock {
                     if repo.has_changes().unwrap_or(false) {
-                        let summary = repo.status_summary().unwrap_or_else(|_| "changes".to_string());
+                        let summary = repo
+                            .status_summary()
+                            .unwrap_or_else(|_| "changes".to_string());
                         let msg = format!("[auto] {}", summary);
                         let _ = repo.commit(&msg);
                     }
@@ -192,8 +191,12 @@ mod tests {
 
         // Initial commit needed before we can commit again
         let sig = git2::Signature::now("Test", "test@test.com").unwrap();
-        let tree = repo_obj.find_tree(repo_obj.index().unwrap().write_tree().unwrap()).unwrap();
-        repo_obj.commit(Some("HEAD"), &sig, &sig, "initial", &tree, &[]).unwrap();
+        let tree = repo_obj
+            .find_tree(repo_obj.index().unwrap().write_tree().unwrap())
+            .unwrap();
+        repo_obj
+            .commit(Some("HEAD"), &sig, &sig, "initial", &tree, &[])
+            .unwrap();
 
         // Now test our GitRepo
         let repo = git::GitRepo::open(tmp.path()).unwrap();

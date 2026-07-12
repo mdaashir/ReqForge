@@ -21,6 +21,8 @@ pub mod vault;
 pub use basic::BasicAuth;
 pub use bearer::BearerAuth;
 pub use jwt::JwtAuth;
-pub use jwt_token::{decode_unverified, sign_hs256, sign_rs256, verify_hs256, Claims, JwtHeader, JwtKey};
+pub use jwt_token::{
+    decode_unverified, sign_hs256, sign_rs256, verify_hs256, Claims, JwtHeader, JwtKey,
+};
 pub use oauth2::OAuth2Auth;
 pub use types::{ApiKeyAuth, ApiKeyLocation, AuthCredentials, AuthProvider, AuthType};

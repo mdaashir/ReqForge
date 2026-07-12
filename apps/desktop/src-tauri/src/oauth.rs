@@ -9,7 +9,9 @@
 //! 5. Extract the `code` and `state` from the callback
 //! 6. Close the listener and return the auth code
 
-use reqforge_core::auth::pkce::{build_authorize_url, exchange_code, CodeChallenge, CodeVerifier, OAuth2Config, generate_state};
+use reqforge_core::auth::pkce::{
+    build_authorize_url, exchange_code, generate_state, CodeChallenge, CodeVerifier, OAuth2Config,
+};
 use reqforge_core::error::Error;
 use reqforge_core::Result as CoreResult;
 use serde::{Deserialize, Serialize};
@@ -49,9 +51,7 @@ struct PendingAuth {
 /// 3. Listen on localhost for the redirect
 /// 4. Exchange the code for tokens
 /// 5. Return the tokens to the frontend
-pub async fn run_oauth_flow(
-    req: OAuthFlowRequest,
-) -> CoreResult<OAuthFlowResult> {
+pub async fn run_oauth_flow(req: OAuthFlowRequest) -> CoreResult<OAuthFlowResult> {
     let state = generate_state();
 
     // Step 1: PKCE setup
@@ -189,5 +189,5 @@ fn url_decode(s: &str) -> String {
     out
 }
 
-use tauri::command;
 use open;
+use tauri::command;

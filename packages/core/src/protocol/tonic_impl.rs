@@ -27,27 +27,52 @@ use tokio::sync::mpsc;
 pub struct Backend;
 
 impl Backend {
-    pub fn new() -> Self { Self }
+    pub fn new() -> Self {
+        Self
+    }
 
-    pub fn name(&self) -> &str { "gRPC (tonic — placeholder)" }
+    pub fn name(&self) -> &str {
+        "gRPC (tonic — placeholder)"
+    }
 
     pub fn capabilities(&self) -> ProtocolCapabilities {
-        ProtocolCapabilities { can_send: true, can_receive: true, can_stream: false, can_subscribe: false }
+        ProtocolCapabilities {
+            can_send: true,
+            can_receive: true,
+            can_stream: false,
+            can_subscribe: false,
+        }
     }
 
     pub async fn invoke_unary(&self, _request: Request) -> Result<Response> {
-        Err(Error::other("tonic unary not yet implemented; use default grpc-web backend"))
+        Err(Error::other(
+            "tonic unary not yet implemented; use default grpc-web backend",
+        ))
     }
 
-    pub async fn invoke_server_streaming(&self, _request: Request) -> Result<mpsc::Receiver<std::result::Result<GrpcStreamMessage, Error>>> {
+    pub async fn invoke_server_streaming(
+        &self,
+        _request: Request,
+    ) -> Result<mpsc::Receiver<std::result::Result<GrpcStreamMessage, Error>>> {
         Err(Error::other("tonic streaming not yet implemented"))
     }
 
-    pub async fn invoke_bidi_stream(&self, _request: Request) -> Result<(mpsc::Sender<Vec<u8>>, mpsc::Receiver<std::result::Result<GrpcStreamMessage, Error>>)> {
+    pub async fn invoke_bidi_stream(
+        &self,
+        _request: Request,
+    ) -> Result<(
+        mpsc::Sender<Vec<u8>>,
+        mpsc::Receiver<std::result::Result<GrpcStreamMessage, Error>>,
+    )> {
         Err(Error::other("tonic bidi not yet implemented"))
     }
 
-    pub async fn resolve_method(&self, _target: &str, _service: &str, _method: &str) -> Result<crate::protocol::grpc::GrpcMethodDescriptor> {
+    pub async fn resolve_method(
+        &self,
+        _target: &str,
+        _service: &str,
+        _method: &str,
+    ) -> Result<crate::protocol::grpc::GrpcMethodDescriptor> {
         Err(Error::other("tonic reflection not yet implemented"))
     }
 }

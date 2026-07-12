@@ -127,12 +127,7 @@ impl Db {
         Ok(())
     }
 
-    pub fn upsert_doc_state(
-        &self,
-        doc_id: &str,
-        owner: &str,
-        state: &[u8],
-    ) -> ServerResult<()> {
+    pub fn upsert_doc_state(&self, doc_id: &str, owner: &str, state: &[u8]) -> ServerResult<()> {
         let now = now_ms();
         let conn = self.conn.lock().unwrap();
         conn.execute(

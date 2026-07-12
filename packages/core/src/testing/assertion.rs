@@ -14,17 +14,11 @@ pub enum AssertionType {
     /// Response body matches a regex pattern
     BodyMatches { pattern: String },
     /// Response header exists with expected value
-    HeaderEquals {
-        header: String,
-        expected: String,
-    },
+    HeaderEquals { header: String, expected: String },
     /// Response header contains a substring
     HeaderContains { header: String, substring: String },
     /// JSON path expression returns expected value
-    JsonPath {
-        path: String,
-        expected: String,
-    },
+    JsonPath { path: String, expected: String },
     /// Content-Type header matches
     ContentType { expected: String },
     /// JSON Schema validation of response body
@@ -108,10 +102,16 @@ impl Assertion {
 
             AssertionType::ResponseTime { max_ms } => {
                 if response.timing.total_ms <= *max_ms {
-                    AssertionResult::passed(format!("Response time {}ms <= {}ms", response.timing.total_ms, max_ms))
+                    AssertionResult::passed(format!(
+                        "Response time {}ms <= {}ms",
+                        response.timing.total_ms, max_ms
+                    ))
                 } else {
                     AssertionResult::failed_with(
-                        format!("Response time {}ms exceeded limit {}ms", response.timing.total_ms, max_ms),
+                        format!(
+                            "Response time {}ms exceeded limit {}ms",
+                            response.timing.total_ms, max_ms
+                        ),
                         format!("<= {}ms", max_ms),
                         format!("{}ms", response.timing.total_ms),
                     )
@@ -131,26 +131,28 @@ impl Assertion {
                 }
             }
 
-            AssertionType::BodyMatches { pattern } => {
-                match regex::Regex::new(pattern) {
-                    Ok(re) => {
-                        let body_text = String::from_utf8_lossy(&response.body.content);
-                        if re.is_match(&body_text) {
-                            AssertionResult::passed(format!("Body matches pattern '{}'", pattern))
-                        } else {
-                            AssertionResult::failed(format!("Body does not match pattern '{}'", pattern))
-                        }
+            AssertionType::BodyMatches { pattern } => match regex::Regex::new(pattern) {
+                Ok(re) => {
+                    let body_text = String::from_utf8_lossy(&response.body.content);
+                    if re.is_match(&body_text) {
+                        AssertionResult::passed(format!("Body matches pattern '{}'", pattern))
+                    } else {
+                        AssertionResult::failed(format!(
+                            "Body does not match pattern '{}'",
+                            pattern
+                        ))
                     }
-                    Err(e) => AssertionResult::failed(format!("Invalid regex: {}", e)),
                 }
-            }
+                Err(e) => AssertionResult::failed(format!("Invalid regex: {}", e)),
+            },
 
             AssertionType::HeaderEquals { header, expected } => {
                 let actual = find_header(&response.headers, header);
                 match actual {
-                    Some(v) if v == *expected => {
-                        AssertionResult::passed(format!("Header '{}' equals '{}'", header, expected))
-                    }
+                    Some(v) if v == *expected => AssertionResult::passed(format!(
+                        "Header '{}' equals '{}'",
+                        header, expected
+                    )),
                     Some(v) => AssertionResult::failed_with(
                         format!("Header '{}' mismatch", header),
                         expected.clone(),
@@ -163,9 +165,10 @@ impl Assertion {
             AssertionType::HeaderContains { header, substring } => {
                 let actual = find_header(&response.headers, header);
                 match actual {
-                    Some(v) if v.contains(substring) => {
-                        AssertionResult::passed(format!("Header '{}' contains '{}'", header, substring))
-                    }
+                    Some(v) if v.contains(substring) => AssertionResult::passed(format!(
+                        "Header '{}' contains '{}'",
+                        header, substring
+                    )),
                     Some(v) => AssertionResult::failed_with(
                         format!("Header '{}' does not contain '{}'", header, substring),
                         substring.clone(),
@@ -182,8 +185,13 @@ impl Assertion {
                         Some(v) => {
                             let actual = v.to_string();
                             let expected_trim = expected.trim_matches('"');
-                            if actual == expected_trim || v.to_string().trim_matches('"') == expected_trim {
-                                AssertionResult::passed(format!("JSON path '{}' = '{}'", path, expected))
+                            if actual == expected_trim
+                                || v.to_string().trim_matches('"') == expected_trim
+                            {
+                                AssertionResult::passed(format!(
+                                    "JSON path '{}' = '{}'",
+                                    path, expected
+                                ))
                             } else {
                                 AssertionResult::failed_with(
                                     format!("JSON path '{}' mismatch", path),

@@ -39,8 +39,8 @@ pub fn validate_json_schema(schema: &str, data: &str) -> Result<()> {
 
 /// Try to compile a schema string — useful for pre-checking user input.
 pub fn validate_schema_is_valid(schema: &str) -> Result<()> {
-    let schema_value: Value = serde_json::from_str(schema)
-        .map_err(|e| Error::assertion(format!("invalid JSON: {e}")))?;
+    let schema_value: Value =
+        serde_json::from_str(schema).map_err(|e| Error::assertion(format!("invalid JSON: {e}")))?;
     jsonschema::JSONSchema::options()
         .with_draft(jsonschema::Draft::Draft7)
         .compile(&schema_value)

@@ -1,6 +1,6 @@
 //! Stub plugin host used when the `plugins` feature is disabled.
 
-use crate::plugin::{PluginManifest, PluginMessage, PluginResponse, PluginPermission};
+use crate::plugin::{PluginManifest, PluginMessage, PluginPermission, PluginResponse};
 use std::collections::HashMap;
 use std::path::Path;
 use thiserror::Error;
@@ -36,7 +36,11 @@ impl PluginHost {
         self.plugins.iter().any(|p| p.id == plugin_id)
     }
 
-    pub fn dispatch(&self, _plugin_id: &str, _msg: PluginMessage) -> Result<PluginResponse, PluginHostError> {
+    pub fn dispatch(
+        &self,
+        _plugin_id: &str,
+        _msg: PluginMessage,
+    ) -> Result<PluginResponse, PluginHostError> {
         Ok(PluginResponse::Ok)
     }
 

@@ -4,14 +4,14 @@
 //! Used by both the Tauri desktop app and the CLI companion.
 
 pub mod auth;
-pub mod crypto;
 pub mod collection;
+pub mod crypto;
 pub mod environment;
 pub mod error;
 pub mod history;
+pub mod import;
 pub mod loadtest;
 pub mod mock;
-pub mod import;
 pub mod plugin;
 pub mod protocol;
 pub mod request;
@@ -25,25 +25,25 @@ pub mod testing;
 pub mod watcher;
 
 pub use auth::{
-    ApiKeyAuth, ApiKeyLocation, AuthCredentials, AuthProvider, AuthType, BasicAuth, BearerAuth,
-    JwtAuth, OAuth2Auth, aws_sig_v4::AwsSigV4Auth,
+    aws_sig_v4::AwsSigV4Auth, ApiKeyAuth, ApiKeyLocation, AuthCredentials, AuthProvider, AuthType,
+    BasicAuth, BearerAuth, JwtAuth, OAuth2Auth,
 };
 pub use collection::{Collection, CollectionItem, CollectionMap, CollectionStorage};
 pub use environment::{
-    Environment, EnvironmentError, EnvironmentStorage, GlobalVariables, Variable,
-    VariableResolver, VariableScope, VariableType,
+    Environment, EnvironmentError, EnvironmentStorage, GlobalVariables, Variable, VariableResolver,
+    VariableScope, VariableType,
 };
 pub use error::{Error, Result};
-#[cfg(feature = "plugins")]
-pub use plugin::PluginHost;
 pub use history::{HistoryEntry, HistoryStorage, DEFAULT_HISTORY_LIMIT};
 pub use import::{BrunoImporter, CurlImporter, Importer, InsomniaImporter, PostmanImporter};
+#[cfg(feature = "plugins")]
+pub use plugin::PluginHost;
 pub use protocol::{
     graphql::{GraphQLBody, GraphQLError, GraphQLHandler, GraphQLOperationType, GraphQLResponse},
     http::HttpHandler,
     websocket::{
-        ConnectionState, MessageDirection, WebSocketConfig, WebSocketConnection,
-        WebSocketHandler, WebSocketMessage, WebSocketMessageType,
+        ConnectionState, MessageDirection, WebSocketConfig, WebSocketConnection, WebSocketHandler,
+        WebSocketMessage, WebSocketMessageType,
     },
     ProtocolCapabilities, ProtocolHandler,
 };

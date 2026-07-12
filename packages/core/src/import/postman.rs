@@ -7,7 +7,9 @@
 use crate::collection::{Collection, CollectionItem};
 use crate::error::{Error, Result};
 use crate::import::Importer;
-use crate::request::{Auth as CoreAuth, AuthType as CoreAuthType, Body, BodyMode, HttpMethod, KeyValue, Request};
+use crate::request::{
+    Auth as CoreAuth, AuthType as CoreAuthType, Body, BodyMode, HttpMethod, KeyValue, Request,
+};
 use serde::Deserialize;
 
 /// Re-export of the public type alias for downstream users
@@ -165,7 +167,11 @@ impl PostmanImporter {
 
     fn convert_item(item: PostmanItem) -> Result<CollectionItem> {
         match item {
-            PostmanItem::Item { name, item, request: _ } => {
+            PostmanItem::Item {
+                name,
+                item,
+                request: _,
+            } => {
                 let children = item
                     .into_iter()
                     .map(Self::convert_item)
@@ -248,7 +254,9 @@ impl PostmanImporter {
     fn extract_url(url: &Option<PostmanUrl>) -> String {
         match url {
             Some(PostmanUrl::String(s)) => s.clone(),
-            Some(PostmanUrl::Object { raw, host, path, .. }) => {
+            Some(PostmanUrl::Object {
+                raw, host, path, ..
+            }) => {
                 if let Some(raw) = raw {
                     return raw.clone();
                 }

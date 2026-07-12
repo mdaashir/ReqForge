@@ -67,11 +67,6 @@ cargo run -p reqforge-cli -- run --url https://httpbin.org/get
 cd apps/desktop && cargo tauri dev
 ```
 
-## Project Status
-
-All P0 blueprint requirements implemented. 142 unit + 9 property tests passing.
-See [BLUEPRINT.md](docs/developement/BLUEPRINT.md) for full scope.
-
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, code quality, commit conventions, and architectural guidelines.

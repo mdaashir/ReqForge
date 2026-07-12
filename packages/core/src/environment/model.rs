@@ -93,9 +93,7 @@ impl Environment {
     }
 
     pub fn get(&self, key: &str) -> Option<&Variable> {
-        self.variables
-            .iter()
-            .find(|v| v.enabled && v.key == key)
+        self.variables.iter().find(|v| v.enabled && v.key == key)
     }
 
     pub fn set(&mut self, key: impl Into<String>, value: impl Into<String>) {
@@ -163,7 +161,10 @@ mod tests {
         let mut env = Environment::new("Dev");
         env.set("base_url", "https://api.dev.example.com");
 
-        assert_eq!(env.get("base_url").unwrap().value, "https://api.dev.example.com");
+        assert_eq!(
+            env.get("base_url").unwrap().value,
+            "https://api.dev.example.com"
+        );
     }
 
     #[test]
@@ -173,7 +174,10 @@ mod tests {
         env.set("base_url", "https://new.example.com");
 
         assert_eq!(env.variables.len(), 1);
-        assert_eq!(env.get("base_url").unwrap().value, "https://new.example.com");
+        assert_eq!(
+            env.get("base_url").unwrap().value,
+            "https://new.example.com"
+        );
     }
 
     #[test]

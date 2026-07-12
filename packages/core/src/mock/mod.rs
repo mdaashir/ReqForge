@@ -111,36 +111,55 @@ impl MockServer {
     /// Start the mock server on a random available port.
     /// Returns the address so callers can configure their client.
     #[cfg(feature = "mock-server")]
-pub async fn start(&mut self) -> Result<SocketAddr, crate::error::Error> {
+    pub async fn start(&mut self) -> Result<SocketAddr, crate::error::Error> {
         use axum::extract::State as AxState;
         use axum::routing::any;
-        use axum::{Json, Router, response::IntoResponse};
+        use axum::{response::IntoResponse, Json, Router};
 
         let rules = self.rules.clone();
         let app = Router::new()
-            .route("/*path", any(move |method: axum::http::Method, uri: axum::http::Uri, AxState(rules): AxState<Arc<RwLock<Vec<MockRule>>>>| async move {
-                let method = method.to_string();
-                let uri = uri.to_string();
-                let rules = rules.read().await;
-                let matched = rules.iter().find(|r| r.matches(&method, &uri));
-                let resp = match matched {
-                    Some(rule) => {
-                        if rule.delay_ms > 0 {
-                            tokio::time::sleep(tokio::time::Duration::from_millis(rule.delay_ms)).await;
+            .route(
+                "/*path",
+                any(
+                    move |method: axum::http::Method,
+                          uri: axum::http::Uri,
+                          AxState(rules): AxState<Arc<RwLock<Vec<MockRule>>>>| async move {
+                        let method = method.to_string();
+                        let uri = uri.to_string();
+                        let rules = rules.read().await;
+                        let matched = rules.iter().find(|r| r.matches(&method, &uri));
+                        let resp = match matched {
+                            Some(rule) => {
+                                if rule.delay_ms > 0 {
+                                    tokio::time::sleep(tokio::time::Duration::from_millis(
+                                        rule.delay_ms,
+                                    ))
+                                    .await;
+                                }
+                                (rule.status, rule.headers.clone(), rule.body.clone())
+                            }
+                            None => (
+                                404,
+                                HashMap::new(),
+                                "{\"error\":\"no mock rule matched\"}".to_string(),
+                            ),
+                        };
+                        let mut response =
+                            axum::response::Response::new(axum::body::Body::from(resp.2));
+                        *response.status_mut() = axum::http::StatusCode::from_u16(resp.0)
+                            .unwrap_or(axum::http::StatusCode::NOT_FOUND);
+                        for (k, v) in &resp.1 {
+                            response.headers_mut().insert(
+                                axum::http::HeaderName::from_bytes(k.as_bytes())
+                                    .unwrap_or(axum::http::HeaderName::from_static("x-default")),
+                                axum::http::HeaderValue::from_str(v)
+                                    .unwrap_or(axum::http::HeaderValue::from_static("")),
+                            );
                         }
-                        (rule.status, rule.headers.clone(), rule.body.clone())
-                    }
-                    None => {
-                        (404, HashMap::new(), "{\"error\":\"no mock rule matched\"}".to_string())
-                    }
-                };
-                let mut response = axum::response::Response::new(axum::body::Body::from(resp.2));
-                *response.status_mut() = axum::http::StatusCode::from_u16(resp.0).unwrap_or(axum::http::StatusCode::NOT_FOUND);
-                for (k, v) in &resp.1 {
-                    response.headers_mut().insert(axum::http::HeaderName::from_bytes(k.as_bytes()).unwrap_or(axum::http::HeaderName::from_static("x-default")), axum::http::HeaderValue::from_str(v).unwrap_or(axum::http::HeaderValue::from_static("")));
-                }
-                response
-            }))
+                        response
+                    },
+                ),
+            )
             .with_state(rules);
 
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
@@ -151,7 +170,9 @@ pub async fn start(&mut self) -> Result<SocketAddr, crate::error::Error> {
 
         tokio::spawn(async move {
             axum::serve(listener, app)
-                .with_graceful_shutdown(async { let _ = rx.await; })
+                .with_graceful_shutdown(async {
+                    let _ = rx.await;
+                })
                 .await
                 .ok();
         });
@@ -164,7 +185,9 @@ pub async fn start(&mut self) -> Result<SocketAddr, crate::error::Error> {
     /// Stop the mock server.
     #[cfg(not(feature = "mock-server"))]
     pub async fn start(&mut self) -> Result<SocketAddr, crate::error::Error> {
-        Err(crate::error::Error::other("mock server requires `mock-server` feature on reqforge-core"))
+        Err(crate::error::Error::other(
+            "mock server requires `mock-server` feature on reqforge-core",
+        ))
     }
 
     pub fn stop(&mut self) {
@@ -232,9 +255,7 @@ mod tests {
     async fn test_server_matches_rule() {
         let mut server = MockServer::new();
         let addr = server.start().await.unwrap();
-        server
-            .set_rule(sample_rule("hello", "/hello", 200))
-            .await;
+        server.set_rule(sample_rule("hello", "/hello", 200)).await;
 
         let client = reqwest::Client::new();
         let resp = client

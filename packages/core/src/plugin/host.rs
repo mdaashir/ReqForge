@@ -90,11 +90,7 @@ impl PluginHost {
             let wasm = std::fs::read(&wasm_path)?;
             let module = Module::new(&self.engine, &wasm)?;
             let wasi = WasiCtxBuilder::new().build();
-            let storage = self
-                .storage
-                .entry(manifest.id.clone())
-                .or_default()
-                .clone();
+            let storage = self.storage.entry(manifest.id.clone()).or_default().clone();
             let state = PluginState { wasi, storage };
             let mut store = Store::new(&self.engine, state);
             store.set_fuel(PLUGIN_FUEL)?;
@@ -109,7 +105,10 @@ impl PluginHost {
             let instance = linker.instantiate(&mut store, &module)?;
 
             // Verify the plugin exports the expected `handle` function.
-            if instance.get_typed_func::<(i32, i32), i32>(&mut store, "handle").is_err() {
+            if instance
+                .get_typed_func::<(i32, i32), i32>(&mut store, "handle")
+                .is_err()
+            {
                 return Err(PluginHostError::Manifest(format!(
                     "{}: missing required `handle` export",
                     manifest.id
@@ -233,7 +232,7 @@ mod tests {
     const MINIMAL_WASM: &[u8] = &[
         0x00, 0x61, 0x73, 0x6d, // \0asm
         0x01, 0x00, 0x00, 0x00, // version 1
-        // empty
+              // empty
     ];
 
     #[test]
@@ -241,12 +240,16 @@ mod tests {
         let dir = TempDir::new().unwrap();
         let plugin_dir = dir.path().join("broken-plugin");
         std::fs::create_dir(&plugin_dir).unwrap();
-        std::fs::write(plugin_dir.join("plugin.toml"), r#"
+        std::fs::write(
+            plugin_dir.join("plugin.toml"),
+            r#"
             id = "reqforge.broken"
             name = "broken"
             version = "0.0.1"
             wasm = "plugin.wasm"
-        "#).unwrap();
+        "#,
+        )
+        .unwrap();
         std::fs::write(plugin_dir.join("plugin.wasm"), MINIMAL_WASM).unwrap();
 
         let mut host = PluginHost::new().unwrap();
@@ -259,10 +262,13 @@ mod tests {
     fn test_dispatch_unknown_plugin_is_passthrough() {
         let mut host = PluginHost::new().unwrap();
         let resp = host
-            .dispatch("nonexistent", PluginMessage::Init {
-                plugin_id: "nonexistent".into(),
-                abi_version: ABI_VERSION,
-            })
+            .dispatch(
+                "nonexistent",
+                PluginMessage::Init {
+                    plugin_id: "nonexistent".into(),
+                    abi_version: ABI_VERSION,
+                },
+            )
             .unwrap();
         assert!(matches!(resp, PluginResponse::Ok));
     }

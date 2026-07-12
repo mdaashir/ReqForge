@@ -55,9 +55,7 @@ impl EnvironmentStorage {
             if let Some(name) = path.file_name() {
                 let name_str = name.to_string_lossy();
                 if name_str.ends_with(".env.yaml") {
-                    let env_name = name_str
-                        .trim_end_matches(".env.yaml")
-                        .to_string();
+                    let env_name = name_str.trim_end_matches(".env.yaml").to_string();
                     names.push(env_name);
                 }
             }
@@ -98,7 +96,10 @@ mod tests {
         let loaded = storage.load("production").unwrap();
 
         assert_eq!(loaded.name, "production");
-        assert_eq!(loaded.get("API_URL").unwrap().value, "https://api.example.com");
+        assert_eq!(
+            loaded.get("API_URL").unwrap().value,
+            "https://api.example.com"
+        );
         assert_eq!(loaded.get("TOKEN").unwrap().value, "secret123");
     }
 

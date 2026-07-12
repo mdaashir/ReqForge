@@ -239,7 +239,11 @@ mod tests {
 
         for i in 0..5 {
             storage
-                .append(make_entry(HttpMethod::Get, &format!("https://x.com/{}", i), 200))
+                .append(make_entry(
+                    HttpMethod::Get,
+                    &format!("https://x.com/{}", i),
+                    200,
+                ))
                 .await
                 .unwrap();
         }
@@ -254,7 +258,11 @@ mod tests {
         let storage = HistoryStorage::new(tmp.path());
 
         storage
-            .append(make_entry(HttpMethod::Get, "https://api.example.com/users", 200))
+            .append(make_entry(
+                HttpMethod::Get,
+                "https://api.example.com/users",
+                200,
+            ))
             .await
             .unwrap();
         storage

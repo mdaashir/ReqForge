@@ -80,7 +80,11 @@ pub fn build_authorize_url(
     state: &str,
 ) -> String {
     let mut url = config.authorization_endpoint.clone();
-    url.push_str(if config.authorization_endpoint.contains('?') { "&" } else { "?" });
+    url.push_str(if config.authorization_endpoint.contains('?') {
+        "&"
+    } else {
+        "?"
+    });
     url.push_str("response_type=code");
     url.push_str("&client_id=");
     url.push_str(&url_encode(&config.client_id));
@@ -156,10 +160,7 @@ pub async fn exchange_code(
 }
 
 /// Refresh an access token using a stored `refresh_token`.
-pub async fn refresh_token(
-    config: &OAuth2Config,
-    refresh_token: &str,
-) -> Result<TokenResponse> {
+pub async fn refresh_token(config: &OAuth2Config, refresh_token: &str) -> Result<TokenResponse> {
     let mut form: Vec<(&str, &str)> = vec![
         ("grant_type", "refresh_token"),
         ("refresh_token", refresh_token),
@@ -186,7 +187,8 @@ pub async fn refresh_token(
             status, body
         )));
     }
-    serde_json::from_value(body).map_err(|e| Error::auth(format!("Malformed refresh response: {e}")))
+    serde_json::from_value(body)
+        .map_err(|e| Error::auth(format!("Malformed refresh response: {e}")))
 }
 
 /// Generate a CSRF `state` parameter (URL-safe, ≥128 bits entropy).
@@ -202,13 +204,9 @@ fn url_encode(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     for b in s.bytes() {
         match b {
-            b'A'..=b'Z'
-            | b'a'..=b'z'
-            | b'0'..=b'9'
-            | b'-'
-            | b'_'
-            | b'.'
-            | b'~' => out.push(b as char),
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
+                out.push(b as char)
+            }
             _ => {
                 out.push('%');
                 out.push_str(&format!("{:02X}", b));

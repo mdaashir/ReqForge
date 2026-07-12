@@ -70,10 +70,7 @@ mod tests {
         let auth = JwtAuth::new("abc.def.ghi");
         let req = Request::new(crate::request::HttpMethod::Get, "https://x.test");
         let applied = auth.apply(req).await.unwrap();
-        assert_eq!(
-            applied.headers.last().unwrap().value,
-            "Bearer abc.def.ghi"
-        );
+        assert_eq!(applied.headers.last().unwrap().value, "Bearer abc.def.ghi");
     }
 
     #[tokio::test]

@@ -271,7 +271,10 @@ mod tests {
         let claims: Claims = serde_json::from_str(json).unwrap();
         let token = sign_hs256(&claims, b"secret-key-of-sufficient-length!").unwrap();
         let decoded = verify_hs256(&token, b"secret-key-of-sufficient-length!").unwrap();
-        assert_eq!(decoded.extra.get("role").unwrap(), &serde_json::json!("admin"));
+        assert_eq!(
+            decoded.extra.get("role").unwrap(),
+            &serde_json::json!("admin")
+        );
         assert_eq!(decoded.extra.get("tenant").unwrap(), &serde_json::json!(42));
     }
 

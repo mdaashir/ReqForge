@@ -15,6 +15,6 @@ mod types;
 
 pub use executor::RequestExecutor;
 pub use types::{
-    Auth, AuthType, Body, BodyMode, Cookie, HttpMethod, KeyValue, Request, RequestSettings, Response, ResponseBody,
-    ResponseSize, ResponseTiming, ResponseTimingDetail,
+    Auth, AuthType, Body, BodyMode, Cookie, HttpMethod, KeyValue, Request, RequestSettings,
+    Response, ResponseBody, ResponseSize, ResponseTiming, ResponseTimingDetail,
 };

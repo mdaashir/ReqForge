@@ -110,10 +110,12 @@ impl SnapshotStorage {
 
         let golden = match self.load(request_id)? {
             Some(g) => g,
-            None => return Err(Error::assertion(format!(
-                "no snapshot found for request '{}' — send the request first to create one",
-                request_id
-            ))),
+            None => {
+                return Err(Error::assertion(format!(
+                    "no snapshot found for request '{}' — send the request first to create one",
+                    request_id
+                )))
+            }
         };
 
         // Normalise both sides (pretty-print JSON) before comparing

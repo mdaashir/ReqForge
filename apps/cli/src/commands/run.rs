@@ -5,8 +5,8 @@ use crate::OutputFormat;
 use anyhow::{anyhow, Context, Result};
 use colored::Colorize;
 use reqforge_core::collection::{Collection, CollectionItem, CollectionStorage};
-use reqforge_core::{HttpHandler, ProtocolHandler};
 use reqforge_core::request::{HttpMethod, Request as CoreRequest, Response as CoreResponse};
+use reqforge_core::{HttpHandler, ProtocolHandler};
 use serde::Serialize;
 use std::path::Path;
 use std::time::Instant;
@@ -92,10 +92,7 @@ pub async fn execute(
         return Err(anyhow!("No matching requests to run"));
     }
 
-    output::print_header(
-        &format!("Running {} request(s)", to_run.len()),
-        format,
-    );
+    output::print_header(&format!("Running {} request(s)", to_run.len()), format);
 
     let mut results: Vec<RunResult> = Vec::with_capacity(to_run.len());
     let mut all_passed = true;
@@ -137,7 +134,11 @@ pub async fn execute(
                 };
 
                 if format == OutputFormat::Human {
-                    let marker = if success { "✓".green().to_string() } else { "✗".red().to_string() };
+                    let marker = if success {
+                        "✓".green().to_string()
+                    } else {
+                        "✗".red().to_string()
+                    };
                     println!(
                         "  {} {} {} ({}ms) - {}",
                         marker,
@@ -152,10 +153,7 @@ pub async fn execute(
             }
             Err(err) => {
                 all_passed = false;
-                output::print_error(
-                    &format!("{}: {}", name, err),
-                    format,
-                );
+                output::print_error(&format!("{}: {}", name, err), format);
             }
         }
     }

@@ -6,8 +6,8 @@
 //! - **gRPC-Web JSON** (feature off) — gRPC-Web spec over HTTP/1.1, unary only.
 
 use crate::error::{Error, Result};
-use crate::request::{Request, Response};
 use crate::protocol::{ProtocolCapabilities, ProtocolHandler};
+use crate::request::{Request, Response};
 use async_trait::async_trait;
 
 // ── Feature-gated tonic imports ──────────────────────────

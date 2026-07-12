@@ -80,10 +80,7 @@ pub struct PostResponseRunResult {
 /// Run extractions against the response body and store into the
 /// returned `HashMap`. The caller decides whether to apply these
 /// to the environment store.
-pub fn run_extractions(
-    script: &PostResponseScript,
-    body_text: &str,
-) -> ExtractionResult {
+pub fn run_extractions(script: &PostResponseScript, body_text: &str) -> ExtractionResult {
     let mut out = ExtractionResult::default();
     let parsed: Option<serde_json::Value> = serde_json::from_str(body_text).ok();
 
@@ -200,10 +197,7 @@ pub fn extract_path(value: &serde_json::Value, path: &str) -> Option<String> {
         // Now process bracket parts — possibly multiple: [0][1]
         if let Some(rest) = bracket_part {
             let mut s = rest;
-            while let Some(idx_str) = s
-                .strip_prefix('[')
-                .and_then(|x| x.split(']').next())
-            {
+            while let Some(idx_str) = s.strip_prefix('[').and_then(|x| x.split(']').next()) {
                 let idx: usize = idx_str.parse().ok()?;
                 current = current.get(idx)?;
                 // Move past the [idx] we just consumed.
@@ -284,8 +278,14 @@ mod tests {
     fn test_extractions_stored() {
         let script = PostResponseScript {
             extractions: vec![
-                ExtractionRule { path: "token".into(), store_as: "AUTH_TOKEN".into() },
-                ExtractionRule { path: "user.id".into(), store_as: "USER_ID".into() },
+                ExtractionRule {
+                    path: "token".into(),
+                    store_as: "AUTH_TOKEN".into(),
+                },
+                ExtractionRule {
+                    path: "user.id".into(),
+                    store_as: "USER_ID".into(),
+                },
             ],
             assertions: vec![],
         };
@@ -334,8 +334,7 @@ mod tests {
                 },
             }],
         };
-        let outcomes =
-            run_assertions(&script, &req(), &resp_with(r#"{"data":{"id":42}}"#));
+        let outcomes = run_assertions(&script, &req(), &resp_with(r#"{"data":{"id":42}}"#));
         assert!(outcomes[0].passed);
     }
 

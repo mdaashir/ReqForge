@@ -33,14 +33,8 @@ async fn main() -> anyhow::Result<()> {
 
     let app = Router::new()
         .route("/health", axum::routing::get(routes::health))
-        .route(
-            "/v1/plugins",
-            axum::routing::get(routes::list_plugins),
-        )
-        .route(
-            "/v1/plugins/:id",
-            axum::routing::get(routes::get_plugin),
-        )
+        .route("/v1/plugins", axum::routing::get(routes::list_plugins))
+        .route("/v1/plugins/:id", axum::routing::get(routes::get_plugin))
         .route(
             "/v1/plugins/:id/versions",
             axum::routing::get(routes::get_plugin_versions),

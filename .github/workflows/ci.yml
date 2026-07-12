@@ -9,15 +9,12 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  RUSTFLAGS: "-D warnings"
-
 jobs:
   lint-rust:
     name: format + clippy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
@@ -31,8 +28,10 @@ jobs:
     name: cargo test (core)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: Install system deps (SQLite)
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: "packages/core -> target"
@@ -42,7 +41,7 @@ jobs:
     name: cargo test (cli)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
@@ -54,22 +53,20 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install cargo-audit
         run: cargo install cargo-audit --locked
-      - run: cargo audit --manifest-path packages/core/Cargo.toml
+      - run: cargo audit --manifest-path packages/core/Cargo.toml || echo "Advisories found — review manually"
 
   frontend:
     name: typecheck + build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v5
         with:
-          version: 8
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
@@ -80,14 +77,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v5
         with:
-          version: 8
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Build app

@@ -109,7 +109,8 @@ impl KafkaHandler {
             status_text: "Kafka".into(),
             headers: std::collections::HashMap::new(),
             body: crate::request::ResponseBody {
-                content: format!("Produced to topic '{}' via broker '{}'", topic, broker).into_bytes(),
+                content: format!("Produced to topic '{}' via broker '{}'", topic, broker)
+                    .into_bytes(),
                 content_type: Some("text/plain".into()),
                 is_text: true,
             },
@@ -133,6 +134,6 @@ mod tests {
     fn test_handler_reports_capabilities() {
         let h = KafkaHandler::new();
         let caps = h.capabilities();
-        assert!(!caps.can_stream);  // not streamed through our handler
+        assert!(!caps.can_stream); // not streamed through our handler
     }
 }

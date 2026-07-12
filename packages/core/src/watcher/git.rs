@@ -31,7 +31,8 @@ impl GitRepo {
     pub fn has_changes(&self) -> Result<bool> {
         let mut status_opts = git2::StatusOptions::new();
         status_opts.include_untracked(true);
-        let statuses = self.repo
+        let statuses = self
+            .repo
             .statuses(Some(&mut status_opts))
             .map_err(|e| Error::other(format!("git status: {e}")))?;
         Ok(!statuses.is_empty())
@@ -40,17 +41,20 @@ impl GitRepo {
     /// Stage all changed files and auto-commit with a descriptive message.
     pub fn commit(&self, message: &str) -> Result<()> {
         // Stage everything (collections, environments, etc)
-        let mut idx = self.repo
+        let mut idx = self
+            .repo
             .index()
             .map_err(|e| Error::other(format!("git index: {e}")))?;
         idx.add_all(["*"].iter(), git2::IndexAddOption::DEFAULT, None)
             .map_err(|e| Error::other(format!("git add: {e}")))?;
-        idx.write().map_err(|e| Error::other(format!("git write index: {e}")))?;
+        idx.write()
+            .map_err(|e| Error::other(format!("git write index: {e}")))?;
 
         let tree_id = idx
             .write_tree()
             .map_err(|e| Error::other(format!("git write tree: {e}")))?;
-        let tree = self.repo
+        let tree = self
+            .repo
             .find_tree(tree_id)
             .map_err(|e| Error::other(format!("git find tree: {e}")))?;
 
@@ -58,9 +62,11 @@ impl GitRepo {
             .map_err(|e| Error::other(format!("git signature: {e}")))?;
 
         // Look for existing HEAD to use as parent
-        let parent = self.repo.head().ok().and_then(|head| {
-            head.peel_to_commit().ok()
-        });
+        let parent = self
+            .repo
+            .head()
+            .ok()
+            .and_then(|head| head.peel_to_commit().ok());
 
         let _commit = if let Some(p) = &parent {
             self.repo
@@ -80,7 +86,8 @@ impl GitRepo {
     pub fn status_summary(&self) -> Result<String> {
         let mut opts = git2::StatusOptions::new();
         opts.include_untracked(true);
-        let statuses = self.repo
+        let statuses = self
+            .repo
             .statuses(Some(&mut opts))
             .map_err(|e| Error::other(format!("git status: {e}")))?;
 
@@ -91,7 +98,9 @@ impl GitRepo {
 
         for entry in statuses.iter() {
             let s = entry.status();
-            if s.contains(git2::Status::CURRENT) { continue; }
+            if s.contains(git2::Status::CURRENT) {
+                continue;
+            }
             if s.contains(git2::Status::INDEX_NEW) || s.contains(git2::Status::WT_NEW) {
                 added += 1;
             }

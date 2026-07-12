@@ -76,9 +76,11 @@ pub enum ProtoFieldKind {
     Sint64,
     Message(String),
     Enum(String),
-    Map { key: Box<ProtoFieldKind>, value: Box<ProtoFieldKind> },
+    Map {
+        key: Box<ProtoFieldKind>,
+        value: Box<ProtoFieldKind>,
+    },
 }
-
 
 pub fn parse_proto(input: &str) -> Result<ProtoFile, String> {
     let mut file = ProtoFile {
@@ -339,10 +341,7 @@ fn parse_field(input: &str) -> Option<ProtoField> {
     let type_start = if repeated { 1 } else { 0 };
     let kind_str = parts[type_start];
     let name = parts[type_start + 1];
-    let number_str = parts
-        .iter()
-        .rev()
-        .find(|p| p.parse::<i32>().is_ok())?;
+    let number_str = parts.iter().rev().find(|p| p.parse::<i32>().is_ok())?;
     let number = number_str.parse().ok()?;
 
     Some(ProtoField {

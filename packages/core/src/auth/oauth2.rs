@@ -23,10 +23,7 @@ impl OAuth2Auth {
         }
     }
 
-    pub fn with_refresh(
-        access_token: impl Into<String>,
-        refresh_token: impl Into<String>,
-    ) -> Self {
+    pub fn with_refresh(access_token: impl Into<String>, refresh_token: impl Into<String>) -> Self {
         Self {
             access_token: access_token.into(),
             token_type: Some("Bearer".to_string()),
@@ -112,7 +109,11 @@ mod tests {
 
         let authed = auth.apply(req).await.unwrap();
 
-        let auth_header = authed.headers.iter().find(|h| h.key == "Authorization").unwrap();
+        let auth_header = authed
+            .headers
+            .iter()
+            .find(|h| h.key == "Authorization")
+            .unwrap();
         assert_eq!(auth_header.value, "Bearer ya29.AccessToken");
     }
 
@@ -122,7 +123,11 @@ mod tests {
         let req = Request::new(HttpMethod::Get, "https://api.example.com");
 
         let authed = auth.apply(req).await.unwrap();
-        let auth_header = authed.headers.iter().find(|h| h.key == "Authorization").unwrap();
+        let auth_header = authed
+            .headers
+            .iter()
+            .find(|h| h.key == "Authorization")
+            .unwrap();
         assert_eq!(auth_header.value, "MAC abc");
     }
 

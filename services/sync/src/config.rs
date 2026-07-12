@@ -16,15 +16,12 @@ pub struct Config {
 impl Config {
     pub fn from_env() -> ServerResult<Self> {
         Ok(Self {
-            bind_addr: env::var("REQFORGE_BIND")
-                .unwrap_or_else(|_| "0.0.0.0:7443".to_string()),
+            bind_addr: env::var("REQFORGE_BIND").unwrap_or_else(|_| "0.0.0.0:7443".to_string()),
             database_url: env::var("REQFORGE_DB_URL")
                 .unwrap_or_else(|_| "sqlite://reqforge-sync.db?mode=rwc".to_string()),
             jwt_secret: env::var("REQFORGE_JWT_SECRET")
                 .map_err(|_| {
-                    ServerError::Config(
-                        "REQFORGE_JWT_SECRET must be set (≥32 random bytes)".into(),
-                    )
+                    ServerError::Config("REQFORGE_JWT_SECRET must be set (≥32 random bytes)".into())
                 })?
                 .trim()
                 .to_string(),

@@ -18,9 +18,9 @@
 
 use crate::error::{Error, Result};
 use serde::{Deserialize, Serialize};
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use std::sync::atomic::{AtomicUsize, Ordering};
 use tokio::sync::Semaphore;
 
 /// Configuration for a load test run.
@@ -51,11 +51,21 @@ pub struct LoadTestConfig {
     pub warmup: usize,
 }
 
-fn default_get() -> String { "GET".into() }
-fn default_concurrency() -> usize { 10 }
-fn default_total() -> usize { 100 }
-fn default_timeout() -> u64 { 30 }
-fn default_warmup() -> usize { 5 }
+fn default_get() -> String {
+    "GET".into()
+}
+fn default_concurrency() -> usize {
+    10
+}
+fn default_total() -> usize {
+    100
+}
+fn default_timeout() -> u64 {
+    30
+}
+fn default_warmup() -> usize {
+    5
+}
 
 impl Default for LoadTestConfig {
     fn default() -> Self {
@@ -97,8 +107,9 @@ pub async fn run(config: LoadTestConfig) -> Result<LoadTestResult> {
         .build()
         .map_err(|e| Error::other(format!("loadtest client: {e}")))?;
 
-    let latencies: Arc<tokio::sync::Mutex<Vec<f64>>> =
-        Arc::new(tokio::sync::Mutex::new(Vec::with_capacity(config.total_requests)));
+    let latencies: Arc<tokio::sync::Mutex<Vec<f64>>> = Arc::new(tokio::sync::Mutex::new(
+        Vec::with_capacity(config.total_requests),
+    ));
     let succeeded = Arc::new(AtomicUsize::new(0));
     let failed = Arc::new(AtomicUsize::new(0));
     let semaphore = Arc::new(Semaphore::new(config.concurrency));
@@ -131,8 +142,11 @@ pub async fn run(config: LoadTestConfig) -> Result<LoadTestResult> {
 
                 let mut lat = latencies.lock().await;
                 lat.push(elapsed);
-                if result { succeeded.fetch_add(1, Ordering::Relaxed); }
-                else { failed.fetch_add(1, Ordering::Relaxed); }
+                if result {
+                    succeeded.fetch_add(1, Ordering::Relaxed);
+                } else {
+                    failed.fetch_add(1, Ordering::Relaxed);
+                }
 
                 // Stop when we've done our share.
                 if lat.len() >= total {

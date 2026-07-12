@@ -22,8 +22,8 @@ pub struct AppState {
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
-    let db_path = std::env::var("REQFORGE_TELEMETRY_DB")
-        .unwrap_or_else(|_| "reqforge-telemetry.db".into());
+    let db_path =
+        std::env::var("REQFORGE_TELEMETRY_DB").unwrap_or_else(|_| "reqforge-telemetry.db".into());
     let db = Arc::new(db::Db::open(&db_path).await?);
 
     let app = Router::new()

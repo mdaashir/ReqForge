@@ -1,7 +1,7 @@
 use crate::error::Result;
 use crate::protocol::{ProtocolCapabilities, ProtocolHandler};
-use crate::request::{Request, Response};
 use crate::request::RequestExecutor;
+use crate::request::{Request, Response};
 use async_trait::async_trait;
 
 /// HTTP protocol handler

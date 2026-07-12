@@ -7,7 +7,9 @@
 use crate::collection::{Collection, CollectionItem};
 use crate::error::{Error, Result};
 use crate::import::Importer;
-use crate::request::{Auth as CoreAuth, AuthType as CoreAuthType, Body, BodyMode, HttpMethod, KeyValue, Request};
+use crate::request::{
+    Auth as CoreAuth, AuthType as CoreAuthType, Body, BodyMode, HttpMethod, KeyValue, Request,
+};
 use uuid::Uuid;
 
 pub struct CurlImporter;
@@ -121,33 +123,31 @@ impl CurlImporter {
             .map_err(|e| Error::other(format!("Invalid HTTP method: {}", e)))?;
 
         // Convert body to query params if -G was used
-        let (final_url, final_params, final_method) = if use_get_for_data && !body.content.is_empty() {
-            let sep = if url.contains('?') { '&' } else { '?' };
-            let new_url = format!("{}{}{}", url, sep, body.content);
-            let mut params = Vec::new();
-            for pair in body.content.split('&') {
-                if let Some((k, v)) = pair.split_once('=') {
-                    params.push(KeyValue {
-                        key: k.to_string(),
-                        value: v.to_string(),
-                        enabled: true,
-                        description: None,
-                    });
+        let (final_url, final_params, final_method) =
+            if use_get_for_data && !body.content.is_empty() {
+                let sep = if url.contains('?') { '&' } else { '?' };
+                let new_url = format!("{}{}{}", url, sep, body.content);
+                let mut params = Vec::new();
+                for pair in body.content.split('&') {
+                    if let Some((k, v)) = pair.split_once('=') {
+                        params.push(KeyValue {
+                            key: k.to_string(),
+                            value: v.to_string(),
+                            enabled: true,
+                            description: None,
+                        });
+                    }
                 }
-            }
-            (new_url, params, HttpMethod::Get)
-        } else {
-            (url, Vec::new(), method)
-        };
+                (new_url, params, HttpMethod::Get)
+            } else {
+                (url, Vec::new(), method)
+            };
 
         let auth = basic_auth.map(|(u, p)| CoreAuth {
             auth_type: CoreAuthType::Basic,
-            config: [
-                ("username".to_string(), u),
-                ("password".to_string(), p),
-            ]
-            .into_iter()
-            .collect(),
+            config: [("username".to_string(), u), ("password".to_string(), p)]
+                .into_iter()
+                .collect(),
         });
 
         let request = Request {
@@ -258,7 +258,9 @@ mod tests {
     #[test]
     fn test_import_simple_get() {
         let importer = CurlImporter;
-        let collection = importer.import("curl https://api.example.com/users").unwrap();
+        let collection = importer
+            .import("curl https://api.example.com/users")
+            .unwrap();
 
         assert_eq!(collection.items.len(), 1);
         match &collection.items[0] {
@@ -335,7 +337,8 @@ mod tests {
 
     #[test]
     fn test_tokenize_with_quotes() {
-        let tokens = tokenize(r#"curl -H "Content-Type: application/json" -d '{"name":1}' https://x"#);
+        let tokens =
+            tokenize(r#"curl -H "Content-Type: application/json" -d '{"name":1}' https://x"#);
         assert_eq!(
             tokens,
             vec![

@@ -75,33 +75,46 @@ impl AwsSigV4Auth {
         let method = request.method.to_string();
         let canonical_uri = canonical_path(&request.url);
         let canonical_querystring = canonical_query_string(&request.params, &request.url);
-        let (signed_headers, canonical_headers) = canonical_headers_from_request(&request, &amz_date);
+        let (signed_headers, canonical_headers) =
+            canonical_headers_from_request(&request, &amz_date);
 
-        let payload_hash = hex::encode(payload_hash_for_method(&request.body.content, &request.body.mode));
+        let payload_hash = hex::encode(payload_hash_for_method(
+            &request.body.content,
+            &request.body.mode,
+        ));
 
         let canonical_request = format!(
             "{}\n{}\n{}\n{}\n{}\n{}",
-            method, canonical_uri, canonical_querystring, canonical_headers, signed_headers, payload_hash
+            method,
+            canonical_uri,
+            canonical_querystring,
+            canonical_headers,
+            signed_headers,
+            payload_hash
         );
 
         let canonical_request_hash = hex::encode(Sha256::digest(canonical_request.as_bytes()));
 
         // String to sign
         let algorithm = "AWS4-HMAC-SHA256";
-        let credential_scope = format!("{}/{}/{}/aws4_request", date_stamp, self.region, self.service);
+        let credential_scope = format!(
+            "{}/{}/{}/aws4_request",
+            date_stamp, self.region, self.service
+        );
         let string_to_sign = format!(
             "{}\n{}\n{}\n{}",
-            algorithm,
-            amz_date,
-            credential_scope,
-            canonical_request_hash
+            algorithm, amz_date, credential_scope, canonical_request_hash
         );
 
         // Signing key
-        let signing_key = derive_signing_key(&self.secret_key, date_stamp, &self.region, &self.service);
+        let signing_key =
+            derive_signing_key(&self.secret_key, date_stamp, &self.region, &self.service);
         let signature = hex::encode(sign(&signing_key, string_to_sign.as_bytes()));
 
-        let signed_headers_str = signed_headers.split_whitespace().collect::<Vec<_>>().join(";");
+        let signed_headers_str = signed_headers
+            .split_whitespace()
+            .collect::<Vec<_>>()
+            .join(";");
 
         let authorization = format!(
             "{} Credential={}/{}, SignedHeaders={}, Signature={}",
@@ -143,10 +156,7 @@ impl AwsSigV4Auth {
         _headers: &[(String, String)],
     ) -> Result<(String, String, String)> {
         // Simple wrapper for external use
-        let mut req = Request::new(
-            HttpMethod::Get,
-            _url,
-        );
+        let mut req = Request::new(HttpMethod::Get, _url);
         if let Some(pos) = _url.find('?') {
             let qs = _url[pos + 1..].to_string();
             for pair in qs.split('&') {
@@ -175,8 +185,18 @@ impl AwsSigV4Auth {
         }
 
         let signed = self.apply(req)?;
-        let auth = signed.headers.iter().find(|h| h.key == "Authorization").map(|h| h.value.clone()).unwrap_or_default();
-        let date = signed.headers.iter().find(|h| h.key == "X-Amz-Date").map(|h| h.value.clone()).unwrap_or_default();
+        let auth = signed
+            .headers
+            .iter()
+            .find(|h| h.key == "Authorization")
+            .map(|h| h.value.clone())
+            .unwrap_or_default();
+        let date = signed
+            .headers
+            .iter()
+            .find(|h| h.key == "X-Amz-Date")
+            .map(|h| h.value.clone())
+            .unwrap_or_default();
         Ok((auth, date, "AWS4-HMAC-SHA256".to_string()))
     }
 }
@@ -194,7 +214,10 @@ fn format_amz_date(duration: std::time::Duration) -> String {
 
     // Days since epoch to date (Gaussian algorithm sufficient for signing needs)
     let (y, m, d) = days_to_date(days);
-    format!("{:04}{:02}{:02}T{:02}{:02}{:02}Z", y, m, d, hours, minutes, seconds)
+    format!(
+        "{:04}{:02}{:02}T{:02}{:02}{:02}Z",
+        y, m, d, hours, minutes, seconds
+    )
 }
 
 fn days_to_date(days: u64) -> (u64, u64, u64) {
@@ -211,7 +234,11 @@ fn canonical_path(url: &str) -> String {
     // Extract path portion from URL
     if let Ok(parsed) = url::Url::parse(url) {
         let path = parsed.path();
-        if path.is_empty() { "/".to_string() } else { path.to_string() }
+        if path.is_empty() {
+            "/".to_string()
+        } else {
+            path.to_string()
+        }
     } else {
         // Bare path
         "/".to_string()
@@ -246,7 +273,10 @@ fn canonical_headers_from_request(request: &Request, amz_date: &str) -> (String,
     let mut header_map: HashMap<String, String> = HashMap::new();
 
     // Add X-Amz-Date if not present
-    let has_date = request.headers.iter().any(|h| h.key.eq_ignore_ascii_case("x-amz-date"));
+    let has_date = request
+        .headers
+        .iter()
+        .any(|h| h.key.eq_ignore_ascii_case("x-amz-date"));
     if !has_date {
         header_map.insert("x-amz-date".to_string(), amz_date.to_string());
     }
@@ -304,7 +334,7 @@ fn derive_signing_key(secret_key: &str, date_stamp: &str, region: &str, service:
     let k_date = sign_str(&k_secret, date_stamp);
     let k_region = sign(&k_date, region.as_bytes());
     let k_service = sign(&k_region, service.as_bytes());
-    
+
     sign(&k_service, b"aws4_request")
 }
 
@@ -342,11 +372,20 @@ mod tests {
         let auth = AwsSigV4Auth::new("AKIDEXAMPLE", "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY")
             .with_region("us-east-1")
             .with_service("iam");
-        let req = Request::new(HttpMethod::Get, "https://iam.amazonaws.com/?Action=ListUsers&Version=2010-05-08");
+        let req = Request::new(
+            HttpMethod::Get,
+            "https://iam.amazonaws.com/?Action=ListUsers&Version=2010-05-08",
+        );
         let result = auth.apply(req).unwrap();
 
-        let auth_header = result.headers.iter().find(|h| h.key == "Authorization").unwrap();
-        assert!(auth_header.value.starts_with("AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE"));
+        let auth_header = result
+            .headers
+            .iter()
+            .find(|h| h.key == "Authorization")
+            .unwrap();
+        assert!(auth_header
+            .value
+            .starts_with("AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE"));
         assert!(auth_header.value.contains("SignedHeaders=host;x-amz-date"));
     }
 
@@ -358,7 +397,11 @@ mod tests {
         let req = Request::new(HttpMethod::Post, "https://api.example.com/users");
         let result = auth.apply(req).unwrap();
 
-        let auth_header = result.headers.iter().find(|h| h.key == "Authorization").unwrap();
+        let auth_header = result
+            .headers
+            .iter()
+            .find(|h| h.key == "Authorization")
+            .unwrap();
         assert!(auth_header.value.starts_with("AWS4-HMAC-SHA256"));
         assert!(result.headers.iter().any(|h| h.key == "X-Amz-Date"));
     }
