@@ -1,0 +1,8 @@
+id = "reqforge.header-juggler"
+name = "Header Juggler"
+version = "0.1.0"
+author = "ReqForge"
+description = "Automatically adds a custom header to every outgoing request. Demonstrates the ReqForge plugin ABI."
+wasm = "header_juggler.wasm"
+abi_version = 1
+permissions = ["read_requests", "log"]
