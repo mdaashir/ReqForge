@@ -1,0 +1,49 @@
+[
+  {
+    "id": "header-juggler",
+    "name": "Header Juggler",
+    "version": "0.1.0",
+    "author": "reqforge",
+    "description": "Mutate request headers with regex patterns. Supports find-and-replace, append, prepend, and remove operations.",
+    "license": "MIT",
+    "tags": ["transform", "headers", "regex"],
+    "download_url": "https://plugins.reqforge.io/v1/plugins/header-juggler/0.1.0/header-juggler.wasm",
+    "checksum": null,
+    "published_at": 1700000000,
+    "versions": [
+      {
+        "version": "0.1.0",
+        "download_url": "https://plugins.reqforge.io/v1/plugins/header-juggler/0.1.0/header-juggler.wasm",
+        "checksum": null,
+        "published_at": 1700000000,
+        "changelog": "Initial release"
+      }
+    ]
+  },
+  {
+    "id": "morgan",
+    "name": "Morgan Logging",
+    "version": "0.1.0",
+    "author": "reqforge",
+    "description": "HTTP request logging middleware. Logs method, URL, status, and duration to stdout or a file.",
+    "license": "Apache-2.0",
+    "tags": ["logging", "debug", "devtools"],
+    "download_url": "https://plugins.reqforge.io/v1/plugins/morgan/0.1.0/morgan.wasm",
+    "checksum": null,
+    "published_at": 1700000001,
+    "versions": []
+  },
+  {
+    "id": "jwt-inspector",
+    "name": "JWT Inspector",
+    "version": "0.1.0",
+    "author": "reqforge",
+    "description": "Decode and display the contents of JWT tokens in request responses. Useful for debugging auth flows.",
+    "license": "MIT",
+    "tags": ["auth", "jwt", "debug"],
+    "download_url": "https://plugins.reqforge.io/v1/plugins/jwt-inspector/0.1.0/jwt-inspector.wasm",
+    "checksum": null,
+    "published_at": 1700000002,
+    "versions": []
+  }
+]
