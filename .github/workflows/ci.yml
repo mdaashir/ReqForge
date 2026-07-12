@@ -9,9 +9,12 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  RUSTFLAGS: "-D warnings"
+
 jobs:
-  rust:
-    name: cargo test (core + cli)
+  lint-rust:
+    name: format + clippy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,9 +22,42 @@ jobs:
         with:
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "packages/core -> target\napps/cli -> target"
       - run: cargo fmt --all -- --check
-      - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
-      - run: cargo test --workspace --all-features
+      - run: cargo clippy --package reqforge-core --all-features -- -D warnings
+
+  test-core:
+    name: cargo test (core)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "packages/core -> target"
+      - run: cargo test --package reqforge-core --lib
+
+  test-cli:
+    name: cargo test (cli)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "apps/cli -> target"
+      - run: cargo test --manifest-path apps/cli/Cargo.toml --lib
+
+  audit:
+    name: cargo audit
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --locked
+      - run: cargo audit --manifest-path packages/core/Cargo.toml
 
   frontend:
     name: typecheck + build

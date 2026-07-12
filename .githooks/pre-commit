@@ -1,0 +1,44 @@
+#!/bin/sh
+# ReqForge pre-commit hook
+# Runs cargo fmt + clippy on staged Rust files in core + cli.
+# Install: git config core.hooksPath .githooks
+#
+# To skip (not recommended): git commit --no-verify
+
+set -e
+
+echo "🔍 Running pre-commit checks…"
+
+STAGED_RS=$(git diff --cached --name-only --diff-filter=ACM | grep '\.rs$' || true)
+
+if [ -z "$STAGED_RS" ]; then
+    echo "✅ No Rust files staged — skipping."
+    exit 0
+fi
+
+# ── Format check ──────────────────────────────────────────
+echo "   Checking formatting…"
+cargo fmt --all -- --check 2>/dev/null || {
+    echo "❌ Format check failed. Run: cargo fmt"
+    exit 1
+}
+
+# ── Clippy (core) ─────────────────────────────────────────
+if echo "$STAGED_RS" | grep -q "^packages/core/"; then
+    echo "   Linting core library…"
+    cargo clippy --package reqforge-core -- -D warnings 2>/dev/null || {
+        echo "❌ Clippy failed. Fix warnings above."
+        exit 1
+    }
+fi
+
+# ── Clippy (cli) ──────────────────────────────────────────
+if echo "$STAGED_RS" | grep -q "^apps/cli/"; then
+    echo "   Linting CLI…"
+    cargo clippy --manifest-path apps/cli/Cargo.toml -- -D warnings 2>/dev/null || {
+        echo "❌ Clippy failed. Fix warnings above."
+        exit 1
+    }
+fi
+
+echo "✅ Pre-commit checks passed."

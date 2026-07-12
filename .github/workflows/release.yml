@@ -62,11 +62,11 @@ jobs:
       - name: Cache cargo registry & target
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: "packages/cli -> target"
+          workspaces: "apps/cli -> target"
           shared-key: ${{ matrix.target }}
 
       - name: Build CLI
-        working-directory: packages/cli
+        working-directory: apps/cli
         run: |
           if [ "${{ matrix.cross }}" = "true" ]; then
             cross build --release --target ${{ matrix.target }} --bin reqforge
@@ -77,7 +77,7 @@ jobs:
       - name: Package artifact
         shell: bash
         run: |
-          cd "packages/cli/target/${{ matrix.target }}/release"
+          cd "apps/cli/target/${{ matrix.target }}/release"
           BIN="${{ matrix.binary }}"
           if [ ! -f "$BIN" ]; then
             echo "Binary $BIN not found!"
