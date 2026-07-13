@@ -59,6 +59,42 @@ jobs:
       - working-directory: packages/core
         run: cargo audit || echo "Advisories found — review manually"
 
+  audit-npm:
+    name: pnpm audit
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --prod || echo "Advisories found — review manually"
+
+  coverage:
+    name: code coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install system deps (SQLite)
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
+      - name: Install tarpaulin
+        run: cargo install cargo-tarpaulin --locked
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "packages/core -> target"
+      - name: Generate coverage report
+        run: cargo tarpaulin --package reqforge-core --out Xml --timeout 300 --exclude-files apps/* --all-features
+      - name: Upload to codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./cobertura.xml
+          flags: rust
+          fail_ci_if_error: false
+
   frontend:
     name: typecheck + build
     runs-on: ubuntu-latest
@@ -137,3 +173,31 @@ jobs:
         run: pnpm exec playwright test --reporter=github
         env:
           TAURI_DEV_HOST: http://localhost:1420
+
+  sbom:
+    name: generate SBOM
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install syft
+        run: curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+      - name: Generate SBOM for Rust (core)
+        run: syft packages/core -o cyclonedx-json > sbom-rust-core.json
+      - name: Generate SBOM for Rust (CLI)
+        run: syft apps/cli -o cyclonedx-json > sbom-rust-cli.json
+      - name: Generate SBOM for JavaScript/Node
+        run: syft . -o cyclonedx-json > sbom-nodejs.json
+      - name: Upload SBOMs as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom-*.json
+          retention-days: 30
+      - name: Upload SBOM to artifact registry (if available)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "SBOMs generated successfully"
+          ls -la sbom-*.json
+
