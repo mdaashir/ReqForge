@@ -22,7 +22,7 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@monaco-editor/react": "^4.6.0",
-    "@tanstack/react-virtual": "^3.5.0",
+    "@tanstack/react-virtual": "^3.14.6",
     "@tauri-apps/api": "^2.0.0",
     "@tauri-apps/plugin-dialog": "^2.0.0",
     "ajv": "^8.17.1",
