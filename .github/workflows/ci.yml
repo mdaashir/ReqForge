@@ -94,11 +94,11 @@ jobs:
         run: pnpm build
         env:
           TAURI_DISABLE_DEVICE_CHECK: "1"
-      - name: Install Playwright browsers (force)
+      - name: Install Playwright (always fresh)
         working-directory: e2e
         run: |
-          rm -rf ~/.cache/ms-playwright
-          pnpm exec playwright install chromium --with-deps --force
+          pnpm exec playwright install --with-deps chromium
+          PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright ls -la $HOME/.cache/ms-playwright/
       - name: Run E2E tests
         working-directory: e2e
         run: pnpm exec playwright test --reporter=github
