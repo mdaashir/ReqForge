@@ -77,6 +77,7 @@ jobs:
     name: playwright e2e
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    needs: frontend
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -100,20 +101,34 @@ jobs:
         run: |
           rm -rf $HOME/.cache/ms-playwright
           pnpm exec playwright install --with-deps chromium --force
-        env:
-          HOME: /root
 
       - name: Build frontend
         run: pnpm build
         env:
           TAURI_DISABLE_DEVICE_CHECK: "1"
 
+      - name: Verify dist folder
+        run: |
+          echo "Checking dist folder..."
+          ls -la apps/desktop/dist/ 2>/dev/null || echo "dist folder not found"
+          find apps/desktop/dist -type f | head -10
+
       - name: Serve built frontend on port 1420
         run: |
+          if [ ! -d "apps/desktop/dist" ]; then
+            echo "Error: apps/desktop/dist directory not found"
+            exit 1
+          fi
           cd apps/desktop/dist
-          nohup python3 -m http.server 1420 &
+          nohup python3 -m http.server 1420 > /tmp/server.log 2>&1 &
           sleep 2
-          curl -sI http://localhost:1420/ | head -5
+          if curl -sI http://localhost:1420/ | grep -q "HTTP"; then
+            echo "✓ Server is running"
+          else
+            echo "✗ Server failed to start. Logs:"
+            cat /tmp/server.log
+            exit 1
+          fi
         env:
           TAURI_DEV_HOST: http://localhost:1420
 
@@ -121,5 +136,4 @@ jobs:
         working-directory: e2e
         run: pnpm exec playwright test --reporter=github
         env:
-          HOME: /root
           TAURI_DEV_HOST: http://localhost:1420
