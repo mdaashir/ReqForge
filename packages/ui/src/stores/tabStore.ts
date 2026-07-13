@@ -46,9 +46,9 @@ export const useTabStore = create<TabState>((set, get) => ({
         if (tabs.length === 0) {
           activeId = null
         } else if (idx > 0) {
-          activeId = tabs[Math.min(idx - 1, tabs.length - 1)].id
+          activeId = tabs[Math.min(idx - 1, tabs.length - 1)]!.id
         } else {
-          activeId = tabs[0].id
+          activeId = tabs[0]!.id
         }
       }
       return { tabs, activeId }
@@ -70,7 +70,7 @@ export const useTabStore = create<TabState>((set, get) => ({
     set((state) => {
       const tabs = [...state.tabs]
       const [removed] = tabs.splice(fromIndex, 1)
-      tabs.splice(toIndex, 0, removed)
+      tabs.splice(toIndex, 0, removed!)
       return { tabs }
     })
   },

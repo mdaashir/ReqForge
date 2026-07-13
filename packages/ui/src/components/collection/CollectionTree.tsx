@@ -213,8 +213,8 @@ const VirtualizedItemList = React.memo(function VirtualizedItemList({
   collectionId: string
   depth: number
   selectedRequestId: string | null
-  onSelectRequest: (requestId: string) => void
-  onCreateRequest: (parentId: string) => void
+  onSelectRequest: (collectionId: string, requestId: string) => void
+  onCreateRequest: (collectionId: string) => void
 }) {
   const parentRef = React.useRef<HTMLDivElement>(null)
   const virtualizer = useVirtualizer({
@@ -239,7 +239,7 @@ const VirtualizedItemList = React.memo(function VirtualizedItemList({
       style={{ height: virtualizer.getTotalSize() }}
     >
       {virtualizer.getVirtualItems().map((virtualRow) => {
-        const item = items[virtualRow.index]
+        const item = items[virtualRow.index]!
         return (
           <div
             key={item.id}
@@ -256,7 +256,7 @@ const VirtualizedItemList = React.memo(function VirtualizedItemList({
               item={item}
               collectionId={collectionId}
               depth={depth}
-              selectedRequestId={selectedRequestId}
+              selectedRequestId={selectedRequestId ?? undefined}
               onSelectRequest={onSelectRequest}
               onCreateRequest={onCreateRequest}
             />
@@ -350,9 +350,9 @@ export const CollectionTree = React.forwardRef<HTMLDivElement, CollectionTreePro
                     items={collection.items}
                     collectionId={collection.id}
                     depth={0}
-                    selectedRequestId={selectedRequestId}
-                    onSelectRequest={onSelectRequest}
-                    onCreateRequest={onCreateRequest}
+                    selectedRequestId={selectedRequestId ?? null}
+                    onSelectRequest={(a, b) => onSelectRequest(a, b)}
+                    onCreateRequest={(id) => onCreateRequest?.(id)}
                   />
                 </SortableContext>
               </DndContext>

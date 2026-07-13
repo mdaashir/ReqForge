@@ -1,12 +1,9 @@
 import { useCallback } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 
-export type AuthType = 'none' | 'apiKey' | 'bearer' | 'basic' | 'oauth2' | 'jwt' | 'awsSigV4'
+export type { AuthConfig } from '../types'
 
-export interface AuthConfig {
-  authType: AuthType
-  config: Record<string, string>
-}
+export type AuthType = 'none' | 'apiKey' | 'bearer' | 'basic' | 'oauth2' | 'jwt' | 'awsSigV4'
 
 interface UseAuthReturn {
   getToken: (provider: string, config: Record<string, string>) => Promise<string | null>

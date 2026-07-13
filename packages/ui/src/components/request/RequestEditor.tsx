@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { cn } from '../../lib/utils'
-import { MethodSelector, type MethodSelectorProps } from './MethodSelector'
-import { UrlBar, type UrlBarProps } from './UrlBar'
-import { BodyEditor, type BodyEditorProps } from './BodyEditor'
-import { KeyValueEditor, type KeyValueEditorProps } from './KeyValueEditor'
-import type { Request, BodyMode, KeyValue } from '../../types'
+import { MethodSelector } from './MethodSelector'
+import { UrlBar } from './UrlBar'
+import { BodyEditor } from './BodyEditor'
+import { KeyValueEditor } from './KeyValueEditor'
+import type { Request, KeyValue } from '../../types'
 
 // ── Context ──────────────────────────────────────────────
 
@@ -46,61 +46,33 @@ function RequestEditorRoot({ request, setRequest, onSend, onSave, children, clas
 
 // ── Sub-components ───────────────────────────────────────
 
-function Method(props: Omit<MethodSelectorProps, 'value' | 'onChange'>) {
+function Method({ className }: { className?: string }) {
+  const { request, setRequest } = useRequestEditor()
+  return <MethodSelector value={request.method} onChange={(method) => setRequest({ method })} className={className} />
+}
+
+function Url({ className }: { className?: string }) {
+  const { request, setRequest, onSend } = useRequestEditor()
+  return <UrlBar method={request.method} url={request.url} onMethodChange={(method) => setRequest({ method })} onUrlChange={(url) => setRequest({ url })} onSend={onSend ?? (() => {})} className={className} />
+}
+
+function Headers({ className }: { className?: string }) {
   const { request, setRequest } = useRequestEditor()
   return (
-    <MethodSelector
-      value={request.method}
-      onChange={(method) => setRequest({ method })}
-      {...props}
-    />
+    <KeyValueEditor items={request.headers} onChange={(headers: KeyValue[]) => setRequest({ headers })} className={className} />
   )
 }
 
-function Url(props: Omit<UrlBarProps, 'value' | 'onChange'>) {
+function Params({ className }: { className?: string }) {
   const { request, setRequest } = useRequestEditor()
   return (
-    <UrlBar
-      value={request.url}
-      onChange={(url) => setRequest({ url })}
-      {...props}
-    />
+    <KeyValueEditor items={request.params} onChange={(params: KeyValue[]) => setRequest({ params })} className={className} />
   )
 }
 
-function Headers(props: Omit<KeyValueEditorProps, 'items' | 'onChange' | 'name'>) {
+function Body({ className }: { className?: string }) {
   const { request, setRequest } = useRequestEditor()
-  return (
-    <KeyValueEditor
-      name="Headers"
-      items={request.headers}
-      onChange={(headers: KeyValue[]) => setRequest({ headers })}
-      {...props}
-    />
-  )
-}
-
-function Params(props: Omit<KeyValueEditorProps, 'items' | 'onChange' | 'name'>) {
-  const { request, setRequest } = useRequestEditor()
-  return (
-    <KeyValueEditor
-      name="Query Params"
-      items={request.params}
-      onChange={(params: KeyValue[]) => setRequest({ params })}
-      {...props}
-    />
-  )
-}
-
-function Body(props: Omit<BodyEditorProps, 'body' | 'onChange'>) {
-  const { request, setRequest } = useRequestEditor()
-  return (
-    <BodyEditor
-      body={request.body}
-      onChange={(body) => setRequest({ body })}
-      {...props}
-    />
-  )
+  return <BodyEditor body={request.body} onChange={(body) => setRequest({ body })} className={className} />
 }
 
 function Send(_props: { children?: React.ReactNode; className?: string }) {

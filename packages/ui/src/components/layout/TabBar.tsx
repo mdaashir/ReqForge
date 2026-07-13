@@ -19,7 +19,7 @@ export interface TabBarProps {
 }
 
 export const TabBar = React.forwardRef<HTMLDivElement, TabBarProps>(
-  ({ tabs, activeId, onSelect, onClose, className }, ref) => {
+  ({ tabs, activeId, onSelect, onClose, onReorder, className }, ref) => {
     const [dragIdx, setDragIdx] = React.useState<number | null>(null)
 
     const typeColor: Record<string, string> = {
