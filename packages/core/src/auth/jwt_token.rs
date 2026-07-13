@@ -98,7 +98,7 @@ pub fn sign_rs256(claims: &Claims, pem_private_key: &str) -> Result<String> {
         let header_b64 = b64url_encode(&serde_json::to_vec(&header)?);
         let payload_b64 = b64url_encode(&serde_json::to_vec(claims)?);
         let signing_input = format!("{}.{}", header_b64, payload_b64);
-        let signing_key = SigningKey::<Sha256>::new(key);
+        let signing_key = SigningKey::<Sha256>::new_unprefixed(key);
         let sig: Signature = signing_key.sign(signing_input.as_bytes());
         Ok(format!(
             "{}.{}",
