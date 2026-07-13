@@ -1,0 +1,210 @@
+name: Dependabot Auto-Merge
+
+on:
+  pull_request:
+    branches: [main]
+  pull_request_review:
+    branches: [main]
+  check_suite:
+    types: [completed]
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  auto-merge:
+    name: Auto-merge Dependabot PRs
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: Fetch PR details
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              // Try to find the PR from check_suite event
+              const prs = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                head: `dependabot/*`
+              });
+              
+              if (prs.data.length === 0) {
+                console.log('No Dependabot PR found');
+                return;
+              }
+              core.setOutput('pr_number', prs.data[0].number);
+              core.setOutput('pr_title', prs.data[0].title);
+              return;
+            }
+            
+            core.setOutput('pr_number', pr.number);
+            core.setOutput('pr_title', pr.title);
+
+      - name: Determine merge strategy
+        id: strategy
+        run: |
+          PR_TITLE="${{ steps.pr.outputs.pr_title }}"
+          
+          # Skip security updates - they need manual review
+          if [[ "$PR_TITLE" =~ security ]]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "reason=Security updates require manual review" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Skip major version bumps - they need manual review
+          if [[ "$PR_TITLE" =~ "from [0-9]+\.[0-9]+\.[0-9]+ to [1-9][0-9]+\." ]]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "reason=Major version bumps require manual review" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "skip=false" >> $GITHUB_OUTPUT
+          echo "reason=Patch/minor update" >> $GITHUB_OUTPUT
+
+      - name: Wait for CI to complete
+        if: steps.strategy.outputs.skip == 'false'
+        id: wait-ci
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr.outputs.pr_number }};
+            const maxRetries = 30; // 5 minutes with 10-second intervals
+            let retries = 0;
+            
+            while (retries < maxRetries) {
+              // Get PR check runs
+              const checkRuns = await github.rest.checks.listForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: context.payload.pull_request?.head.sha || context.sha
+              });
+              
+              console.log(`Check runs: ${checkRuns.data.check_runs.length}`);
+              
+              if (checkRuns.data.check_runs.length === 0) {
+                console.log('Waiting for CI to start...');
+                await new Promise(resolve => setTimeout(resolve, 10000));
+                retries++;
+                continue;
+              }
+              
+              // Check if all runs are completed
+              const allCompleted = checkRuns.data.check_runs.every(run => run.status === 'completed');
+              
+              if (!allCompleted) {
+                console.log('Waiting for CI to complete...');
+                await new Promise(resolve => setTimeout(resolve, 10000));
+                retries++;
+                continue;
+              }
+              
+              // Check if all runs passed
+              const allPassed = checkRuns.data.check_runs.every(run => 
+                run.conclusion === 'success' || run.conclusion === 'neutral'
+              );
+              
+              if (allPassed) {
+                core.setOutput('ci_passed', 'true');
+                console.log('✅ All CI checks passed!');
+                return;
+              } else {
+                core.setOutput('ci_passed', 'false');
+                const failed = checkRuns.data.check_runs.filter(run => run.conclusion === 'failure');
+                console.log(`❌ Failed checks: ${failed.map(r => r.name).join(', ')}`);
+                return;
+              }
+            }
+            
+            core.setOutput('ci_passed', 'false');
+            console.log('⏱️ Timeout waiting for CI');
+
+      - name: Approve PR
+        if: steps.strategy.outputs.skip == 'false' && steps.wait-ci.outputs.ci_passed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr.outputs.pr_number }};
+            
+            try {
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                event: 'APPROVE',
+                body: '✅ All checks passed. Auto-merging dependency update.'
+              });
+              console.log('✅ PR approved');
+            } catch (error) {
+              console.log('ℹ️ Review already exists or cannot approve:', error.message);
+            }
+
+      - name: Enable auto-merge
+        if: steps.strategy.outputs.skip == 'false' && steps.wait-ci.outputs.ci_passed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr.outputs.pr_number }};
+            
+            try {
+              await github.rest.pulls.enableAutomerge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                merge_method: 'squash'
+              });
+              console.log('✅ Auto-merge enabled');
+            } catch (error) {
+              console.log('⚠️ Could not enable auto-merge:', error.message);
+              // Try direct merge as fallback
+              try {
+                await github.rest.pulls.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber,
+                  merge_method: 'squash',
+                  commit_title: `chore(deps): automated dependency update`,
+                  commit_message: 'Auto-merged by Dependabot auto-merge workflow'
+                });
+                console.log('✅ PR merged directly');
+              } catch (mergeError) {
+                console.log('❌ Could not merge PR:', mergeError.message);
+              }
+            }
+
+      - name: Skip notification
+        if: steps.strategy.outputs.skip == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('⏭️ Skipping auto-merge: ${{ steps.strategy.outputs.reason }}');
+
+      - name: CI failed notification
+        if: steps.strategy.outputs.skip == 'false' && steps.wait-ci.outputs.ci_passed == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.pr.outputs.pr_number }};
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: '❌ CI checks did not pass. Manual review required before merging.'
+            });
+
+  status-check:
+    name: Verify auto-merge status
+    needs: auto-merge
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report
+        run: |
+          echo "✅ Dependabot auto-merge workflow completed"
+          echo "Check PR for merge status"
