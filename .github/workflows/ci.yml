@@ -96,9 +96,9 @@ jobs:
           TAURI_DISABLE_DEVICE_CHECK: "1"
       - name: Install Playwright
         working-directory: e2e
-        run: npx playwright install chromium --with-deps
+        run: pnpm exec playwright install chromium --with-deps
       - name: Run E2E tests
         working-directory: e2e
-        run: npx playwright test --reporter=github
+        run: pnpm exec playwright test --reporter=github
         env:
           HOME: /root
