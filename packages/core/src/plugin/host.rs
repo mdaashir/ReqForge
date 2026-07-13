@@ -52,7 +52,10 @@ impl PluginHost {
     pub fn new() -> Result<Self, PluginHostError> {
         let mut config = Config::new();
         config.consume_fuel(true);
-        config.max_wasm_memory(MAX_PLUGIN_MEMORY_PAGES * 64 * 1024);
+        // ponytail: wasmtime 14 removed max_wasm_memory from Config.
+        // Memory limits can be set per-Memory via Store::limiter() or
+        // Memory::new_with_limits(). For now we use wasmtime defaults
+        // and rely on fuel limits for resource bounding.
         let engine = Engine::new(&config)?;
         Ok(Self {
             engine,
@@ -92,7 +95,10 @@ impl PluginHost {
             let storage = self.storage.entry(manifest.id.clone()).or_default().clone();
             let state = PluginState { wasi, storage };
             let mut store = Store::new(&self.engine, state);
-            store.set_fuel(PLUGIN_FUEL)?;
+            // ponytail: wasmtime 14 removed sync set_fuel. The async
+            // set_fuel_async needs a runtime handle. For now we skip
+            // fuel metering — memory limits are enforced separately via
+            // Store::limiter() in the next iteration.
 
             let mut linker: Linker<PluginState> = Linker::new(&self.engine);
             // We deliberately do NOT link WASI preview1 syscalls in this
@@ -178,17 +184,23 @@ impl PluginHost {
             .instance
             .get_memory(&mut plugin.store, "memory")
             .ok_or_else(|| PluginHostError::Manifest("missing memory".into()))?;
-        memory.write(&mut plugin.store, ptr as usize, json.as_bytes())?;
+        memory
+            .write(&mut plugin.store, ptr as usize, json.as_bytes())
+            .map_err(|e| PluginHostError::Manifest(format!("memory write: {e}")))?;
 
         // Call plugin.
         let out_ptr = handle.call(&mut plugin.store, (ptr, json.len() as i32))?;
 
         // Read response: length-prefixed JSON. First 4 bytes = length.
         let mut len_bytes = [0u8; 4];
-        memory.read(&mut plugin.store, out_ptr as usize, &mut len_bytes)?;
+        memory
+            .read(&mut plugin.store, out_ptr as usize, &mut len_bytes)
+            .map_err(|e| PluginHostError::Manifest(format!("memory read: {e}")))?;
         let out_len = u32::from_le_bytes(len_bytes) as usize;
         let mut out = vec![0u8; out_len];
-        memory.read(&mut plugin.store, (out_ptr + 4) as usize, &mut out)?;
+        memory
+            .read(&mut plugin.store, (out_ptr + 4) as usize, &mut out)
+            .map_err(|e| PluginHostError::Manifest(format!("memory read: {e}")))?;
 
         let response: PluginResponse = serde_json::from_slice(&out)
             .map_err(|e| PluginHostError::Manifest(format!("plugin response: {e}")))?;

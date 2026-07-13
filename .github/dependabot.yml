@@ -16,6 +16,9 @@ updates:
     commit-message:
       prefix: "chore(deps): "
       prefix-development: "chore(deps-dev): "
+    rebase-strategy: "auto"
+    pull-request-branch-name:
+      separator: "/"
 
   - package-ecosystem: "cargo"
     directory: "/apps/cli"
@@ -32,6 +35,9 @@ updates:
     commit-message:
       prefix: "chore(deps): "
       prefix-development: "chore(deps-dev): "
+    rebase-strategy: "auto"
+    pull-request-branch-name:
+      separator: "/"
 
   - package-ecosystem: "cargo"
     directory: "/apps/desktop/src-tauri"
@@ -48,6 +54,9 @@ updates:
     commit-message:
       prefix: "chore(deps): "
       prefix-development: "chore(deps-dev): "
+    rebase-strategy: "auto"
+    pull-request-branch-name:
+      separator: "/"
 
   # JavaScript/TypeScript dependencies (root)
   - package-ecosystem: "npm"
@@ -65,6 +74,9 @@ updates:
     commit-message:
       prefix: "chore(deps): "
       prefix-development: "chore(deps-dev): "
+    rebase-strategy: "auto"
+    pull-request-branch-name:
+      separator: "/"
 
   # JavaScript/TypeScript dependencies (desktop app)
   - package-ecosystem: "npm"
@@ -82,6 +94,9 @@ updates:
     commit-message:
       prefix: "chore(deps): "
       prefix-development: "chore(deps-dev): "
+    rebase-strategy: "auto"
+    pull-request-branch-name:
+      separator: "/"
 
   # JavaScript/TypeScript dependencies (UI package)
   - package-ecosystem: "npm"
@@ -99,6 +114,9 @@ updates:
     commit-message:
       prefix: "chore(deps): "
       prefix-development: "chore(deps-dev): "
+    rebase-strategy: "auto"
+    pull-request-branch-name:
+      separator: "/"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"

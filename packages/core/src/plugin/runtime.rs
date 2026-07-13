@@ -16,6 +16,7 @@ impl Default for PluginHost {
     }
 }
 
+#[cfg(not(feature = "plugins"))]
 impl PluginHost {
     pub fn new() -> Self {
         Self
