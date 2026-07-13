@@ -1,7 +1,16 @@
 name: Release
 
-# Builds the ReqForge CLI (and optionally the desktop bundle) for every
-# supported platform and uploads the artifacts to a GitHub Release.
+# Builds the ReqForge CLI for every supported platform and uploads
+# the artifacts to a GitHub Release.
+#
+# Notes on platform coverage:
+# - x86_64-linux + aarch64-linux (via cross): full Linux support
+# - x86_64-windows: native MSVC build on windows runner
+# - x86_64-macos: native build on macos runner
+# - aarch64-macos: NOT built — GitHub's macOS runners are x86_64
+#   only, and cross-compiling macOS targets requires the macOS SDK
+#   which isn't available on Linux/Windows runners. Remove from
+#   matrix if/when GitHub adds M-series macOS runners.
 
 on:
   push:
@@ -10,9 +19,9 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: 'Publish a draft release?'
+        description: "Publish a draft release?"
         required: false
-        default: 'false'
+        default: "false"
 
 permissions:
   contents: write
@@ -34,10 +43,6 @@ jobs:
             binary: reqforge
             cross: true
           - target: x86_64-apple-darwin
-            os: macos-latest
-            archive: tar.gz
-            binary: reqforge
-          - target: aarch64-apple-darwin
             os: macos-latest
             archive: tar.gz
             binary: reqforge
@@ -74,36 +79,51 @@ jobs:
             cargo build --release --target ${{ matrix.target }} --bin reqforge
           fi
 
-      - name: Package artifact
+      - name: Package artifact (Unix)
+        if: matrix.os != 'windows-latest'
         shell: bash
+        working-directory: apps/cli
         run: |
-          cd "apps/cli/target/${{ matrix.target }}/release"
+          BIN_DIR="target/${{ matrix.target }}/release"
           BIN="${{ matrix.binary }}"
-          if [ ! -f "$BIN" ]; then
-            echo "Binary $BIN not found!"
+          if [ ! -f "$BIN_DIR/$BIN" ]; then
+            echo "Binary $BIN_DIR/$BIN not found!"
+            ls -la "$BIN_DIR/" || true
             exit 1
           fi
           mkdir -p staging
-          cp "$BIN" staging/
-          strip "staging/$BIN" || true
-          cd staging
+          cp "$BIN_DIR/$BIN" staging/
+          (command -v strip >/dev/null && strip "staging/$BIN") || true
           case "${{ matrix.archive }}" in
             tar.xz)
-              tar -cJf "../../${{ matrix.target }}.tar.xz" .
+              tar -cJf "../target/${{ matrix.target }}.tar.xz" -C staging .
               ;;
             tar.gz)
-              tar -czf "../../${{ matrix.target }}.tar.gz" .
-              ;;
-            zip)
-              7z a "../${{ matrix.target }}.zip" .
+              tar -czf "../target/${{ matrix.target }}.tar.gz" -C staging .
               ;;
           esac
+
+      - name: Package artifact (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        working-directory: apps/cli
+        run: |
+          $BIN_DIR = "target/${{ matrix.target }}/release"
+          $BIN = "${{ matrix.binary }}"
+          if (-not (Test-Path "$BIN_DIR/$BIN")) {
+            Write-Error "Binary $BIN_DIR/$BIN not found!"
+            exit 1
+          }
+          New-Item -ItemType Directory -Path "staging" | Out-Null
+          Copy-Item "$BIN_DIR/$BIN" "staging/"
+          Compress-Archive -Path "staging/*" -DestinationPath "../target/${{ matrix.target }}.zip"
+          Compress-Archive -Path "staging/*" -DestinationPath "../target/${{ matrix.target }}.zip" -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: reqforge-cli-${{ matrix.target }}
-          path: packages/cli/target/${{ matrix.target }}.${{ matrix.archive }}
+          path: apps/cli/target/${{ matrix.target }}.${{ matrix.archive }}
           if-no-files-found: error
 
   release:
@@ -124,7 +144,6 @@ jobs:
         with:
           draft: true
           generate_release_notes: true
-          files: |
-            artifacts/**/*
+          files: artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
