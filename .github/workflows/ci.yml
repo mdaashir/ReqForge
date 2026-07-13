@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         with:
           version: 8
       - uses: actions/setup-node@v5
@@ -81,7 +81,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         with:
           version: 8
       - uses: actions/setup-node@v5
@@ -104,6 +104,8 @@ jobs:
         run: |
           rm -rf $HOME/.cache/ms-playwright
           pnpm exec playwright install --with-deps chromium --force
+        env:
+          HOME: /root
 
       - name: Build frontend
         run: pnpm build
