@@ -94,6 +94,11 @@ jobs:
         run: pnpm build
         env:
           TAURI_DISABLE_DEVICE_CHECK: "1"
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package.json') }}
       - name: Install Playwright
         working-directory: e2e
         run: pnpm exec playwright install chromium --with-deps
