@@ -47,7 +47,7 @@ base64 = "0.22"
 hex = "0.4"
 
 # JWT encoding/decoding
-jsonwebtoken = "9.2"
+jsonwebtoken = "10.3"
 
 # PKCE + JWT signing helpers (RFC 7636)
 rand = "0.8"
@@ -55,7 +55,7 @@ sha2 = "0.10"
 rsa = { version = "0.9", optional = true }
 
 # Plugin host
-wasmtime = { version = "14.0", optional = true }
+wasmtime = { version = "46.0", optional = true }
 toml = "0.8"
 
 # CRDT-based sync (collections, environments)
@@ -97,7 +97,7 @@ quick-xml = { version = "0.36", features = ["serialize"] }
 notify = { version = "7.0", optional = true }
 
 # Git integration (auto-commit, sync)
-git2 = { version = "0.19", optional = true }
+git2 = { version = "0.20", optional = true }
 
 [lints]
 rust.unexpected_cfgs = { level = "allow", check-cfg = ['cfg(http3)'] }
