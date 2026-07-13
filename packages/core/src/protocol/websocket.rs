@@ -3,6 +3,7 @@ use crate::protocol::{ProtocolCapabilities, ProtocolHandler};
 use crate::request::Response;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
+#[cfg(feature = "ws")]
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
