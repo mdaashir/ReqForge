@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Fetch PR details
         id: pr
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const pr = context.payload.pull_request;
@@ -70,7 +70,7 @@ jobs:
       - name: Wait for CI to complete
         if: steps.strategy.outputs.skip == 'false'
         id: wait-ci
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const prNumber = ${{ steps.pr.outputs.pr_number }};
@@ -126,7 +126,7 @@ jobs:
 
       - name: Approve PR
         if: steps.strategy.outputs.skip == 'false' && steps.wait-ci.outputs.ci_passed == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const prNumber = ${{ steps.pr.outputs.pr_number }};
@@ -146,7 +146,7 @@ jobs:
 
       - name: Enable auto-merge
         if: steps.strategy.outputs.skip == 'false' && steps.wait-ci.outputs.ci_passed == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const prNumber = ${{ steps.pr.outputs.pr_number }};
@@ -179,14 +179,14 @@ jobs:
 
       - name: Skip notification
         if: steps.strategy.outputs.skip == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             console.log('⏭️ Skipping auto-merge: ${{ steps.strategy.outputs.reason }}');
 
       - name: CI failed notification
         if: steps.strategy.outputs.skip == 'false' && steps.wait-ci.outputs.ci_passed == 'false'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const prNumber = ${{ steps.pr.outputs.pr_number }};
