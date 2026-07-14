@@ -76,7 +76,7 @@ hmac = "0.12"
 zeroize = "1.7"
 
 # MQTT client
-rumqttc = { version = "0.24", optional = true }
+rumqttc = { version = "0.25", optional = true }
 
 # Kafka client (pure Rust, no C deps)
 kafka = { version = "0.10", optional = true }
