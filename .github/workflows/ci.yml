@@ -190,7 +190,7 @@ jobs:
       - name: Generate SBOM for JavaScript/Node
         run: syft . -o cyclonedx-json > sbom-nodejs.json
       - name: Upload SBOMs as artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sbom
           path: sbom-*.json
