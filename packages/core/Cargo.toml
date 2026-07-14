@@ -85,7 +85,7 @@ kafka = { version = "0.10", optional = true }
 rhai = { version = "1.19", features = ["sync", "serde"] }
 
 # SQLite for fast history queries (always available in core)
-rusqlite = { version = "0.31", features = ["bundled"] }
+rusqlite = { version = "0.40", features = ["bundled"] }
 
 # JSON Schema validation for test assertions
 jsonschema = "0.18"
