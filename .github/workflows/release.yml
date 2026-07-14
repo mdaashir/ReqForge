@@ -120,7 +120,7 @@ jobs:
           Compress-Archive -Path "staging/*" -DestinationPath "../target/${{ matrix.target }}.zip" -Force
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reqforge-cli-${{ matrix.target }}
           path: apps/cli/target/${{ matrix.target }}.${{ matrix.archive }}
