@@ -64,7 +64,7 @@ impl Db {
         for ev in events {
             conn.execute(
                 "INSERT INTO usage_events (app_version, os, feature, count, window_ts) VALUES (?1, ?2, ?3, ?4, ?5)",
-                params![ev.app_version, ev.os, ev.feature, ev.count, ev.window_ts],
+                params![ev.app_version, ev.os, ev.feature, ev.count as i64, ev.window_ts],
             )?;
         }
         Ok(())

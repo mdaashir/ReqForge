@@ -24,7 +24,7 @@ hyper = "1.0"
 yrs = "0.27"
 
 # Persistence
-rusqlite = { version = "0.31", features = ["bundled"] }
+rusqlite = { version = "0.40", features = ["bundled"] }
 
 # Auth
 jsonwebtoken = "10.3"

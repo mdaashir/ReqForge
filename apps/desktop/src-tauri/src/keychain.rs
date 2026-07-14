@@ -54,7 +54,7 @@ pub async fn keychain_delete(account: String) -> Result<bool, String> {
     tokio::task::spawn_blocking(move || {
         let entry =
             keyring::Entry::new(SERVICE, &account).map_err(|e| format!("keychain entry: {e}"))?;
-        match entry.delete_password() {
+        match entry.delete_credential() {
             Ok(()) => Ok(true),
             Err(keyring::Error::NoEntry) => Ok(false),
             Err(e) => Err(format!("keychain delete: {e}")),
