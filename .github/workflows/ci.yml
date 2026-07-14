@@ -89,7 +89,7 @@ jobs:
       - name: Generate coverage report
         run: cargo tarpaulin --package reqforge-core --out Xml --timeout 300 --exclude-files apps/* --all-features
       - name: Upload to codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         with:
           files: ./cobertura.xml
           flags: rust
