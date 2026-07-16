@@ -7,4 +7,5 @@ members = [
     "services/sync",
     "services/plugins",
     "services/telemetry",
+    "plugins/header-juggler"
 ]

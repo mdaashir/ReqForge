@@ -8,7 +8,7 @@ edition = "2021"
 
 [dependencies]
 # Async runtime
-tokio = { version = "1.35", features = ["full"] }
+tokio = { version = "1.52", features = ["full"] }
 async-trait = "0.1"
 futures = "0.3"
 
@@ -32,13 +32,13 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 chrono = { version = "0.4", features = ["serde"] }
 
 # UUID
-uuid = { version = "1.6", features = ["v4", "serde"] }
+uuid = { version = "1.24", features = ["v4", "serde"] }
 
 # URL handling
 url = "2.5"
 
 # Regex for variable resolution
-regex = "1.10"
+regex = "1.13"
 
 # Base64 encoding (for Basic auth)
 base64 = "0.22"
@@ -47,7 +47,7 @@ base64 = "0.22"
 hex = "0.4"
 
 # JWT encoding/decoding
-jsonwebtoken = "10.3"
+jsonwebtoken = "10.4"
 
 # PKCE + JWT signing helpers (RFC 7636)
 rand = "0.8"
@@ -73,7 +73,7 @@ tokio-stream = { version = "0.1", optional = true }
 # Encrypted at-rest storage
 aes-gcm = "0.10"
 hmac = "0.12"
-zeroize = "1.7"
+zeroize = "1.9"
 
 # MQTT client
 rumqttc = { version = "0.25", optional = true }
@@ -82,7 +82,7 @@ rumqttc = { version = "0.25", optional = true }
 kafka = { version = "0.10", optional = true }
 
 # Script engine (JS-like pre-request / post-response scripting)
-rhai = { version = "1.19", features = ["sync", "serde"] }
+rhai = { version = "1.25", features = ["sync", "serde"] }
 
 # SQLite for fast history queries (always available in core)
 rusqlite = { version = "0.40", features = ["bundled"] }
@@ -117,9 +117,9 @@ watcher = ["dep:notify", "dep:git2"]
 
 [dev-dependencies]
 tokio-test = "0.4"
-mockito = "1.2"
-tempfile = "3.8"
-proptest = "1.4"
+mockito = "1.7"
+tempfile = "3.27"
+proptest = "1.11"
 
 [dev-dependencies.criterion]
 version = "0.5"
