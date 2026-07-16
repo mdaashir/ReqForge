@@ -52,10 +52,7 @@ fn extract_json_string(input: &str, key: &str) -> Option<String> {
         let after_key = &input[start + search.len()..];
         let colon = after_key.find(':')?;
         let after_colon = after_key[colon + 1..].trim();
-        let trimmed = after_colon
-            .trim_start_matches('"')
-            .split('"')
-            .next()?;
+        let trimmed = after_colon.trim_start_matches('"').split('"').next()?;
         if !trimmed.is_empty() {
             return Some(trimmed.to_string());
         }
@@ -76,7 +73,8 @@ mod tests {
 
     #[test]
     fn test_process_on_request() {
-        let msg = r#"{"kind":"on_request","request_id":"abc","method":"GET","url":"https://x.test"}"#;
+        let msg =
+            r#"{"kind":"on_request","request_id":"abc","method":"GET","url":"https://x.test"}"#;
         let response = process_message(&msg);
         assert!(response.contains("X-Header-Juggler"));
         assert!(response.contains("processed"));

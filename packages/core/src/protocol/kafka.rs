@@ -134,6 +134,8 @@ mod tests {
     fn test_handler_reports_capabilities() {
         let h = KafkaHandler::new();
         let caps = h.capabilities();
-        assert!(!caps.can_stream); // not streamed through our handler
+        // Kafka is a streaming protocol — must support subscribe
+        assert!(caps.can_stream);
+        assert!(caps.can_subscribe);
     }
 }
