@@ -2585,7 +2585,7 @@ dependencies = [
 
 [[package]]
 name = "header-juggler"
-version = "0.1.0"
+version = "0.2.0"
 
 [[package]]
 name = "heck"
@@ -5010,7 +5010,7 @@ checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
 
 [[package]]
 name = "reqforge"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "keyring",
@@ -5029,7 +5029,7 @@ dependencies = [
 
 [[package]]
 name = "reqforge-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -5047,7 +5047,7 @@ dependencies = [
 
 [[package]]
 name = "reqforge-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "aes-gcm",
  "anyhow",
@@ -5096,7 +5096,7 @@ dependencies = [
 
 [[package]]
 name = "reqforge-plugins"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "axum",
@@ -5113,7 +5113,7 @@ dependencies = [
 
 [[package]]
 name = "reqforge-sync"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "axum",
@@ -5138,7 +5138,7 @@ dependencies = [
 
 [[package]]
 name = "reqforge-telemetry"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "axum",

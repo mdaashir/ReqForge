@@ -1,6 +1,6 @@
 [package]
 name = "reqforge-cli"
-version = "0.1.0"
+version = "0.2.0"
 description = "ReqForge CLI - Run collections and tests from the command line"
 authors = ["ReqForge Team"]
 license = "AGPL-3.0"

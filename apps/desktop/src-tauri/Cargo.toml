@@ -1,6 +1,6 @@
 [package]
 name = "reqforge"
-version = "0.1.0"
+version = "0.2.0"
 description = "ReqForge - Ultimate API Development Platform"
 authors = ["ReqForge Team"]
 license = "AGPL-3.0"
