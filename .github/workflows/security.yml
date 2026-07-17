@@ -14,40 +14,6 @@ permissions:
   actions: read
 
 jobs:
-  # ─── CodeQL (JS/TS) ──────────────────────────────────────────────
-  codeql:
-    name: CodeQL
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
-        with:
-          languages: javascript-typescript
-          config: |
-            paths:
-              - apps
-              - packages
-              - services
-              - plugins
-              - web
-              - e2e
-            paths-ignore:
-              - "**/node_modules"
-              - "**/target"
-              - "**/dist"
-              - "**/*.test.*"
-              - "**/*.spec.*"
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v4
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
-        with:
-          category: "/language:javascript-typescript"
-
   # ─── Rust Security ────────────────────────────────────────────────
   cargo-audit:
     name: Cargo audit
@@ -217,7 +183,7 @@ jobs:
   security-summary:
     name: Security summary
     runs-on: ubuntu-latest
-    needs: [codeql, cargo-audit, cargo-deny, pnpm-audit, license-check, secrets-scan, container-scan]
+    needs: [cargo-audit, cargo-deny, pnpm-audit, license-check, secrets-scan, container-scan]
     if: always()
     steps:
       - name: Report
@@ -226,10 +192,10 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| CodeQL Analysis | ${{ needs.codeql.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Cargo Audit | ${{ needs.cargo-audit.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Cargo Deny | ${{ needs.cargo-deny.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| pnpm Audit | ${{ needs.pnpm-audit.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| License Check | ${{ needs.license-check.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Secret Scanning | ${{ needs.secrets-scan.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Container Scanning | ${{ needs.container-scan.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| CodeQL | ℹ️ (handled by default setup) |" >> $GITHUB_STEP_SUMMARY
