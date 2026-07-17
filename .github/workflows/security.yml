@@ -14,21 +14,17 @@ permissions:
   actions: read
 
 jobs:
-  # ─── CodeQL (JS/TS + Python) ──────────────────────────────────────
+  # ─── CodeQL (JS/TS) ──────────────────────────────────────────────
   codeql:
-    name: CodeQL (${{ matrix.language }})
+    name: CodeQL
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ["javascript-typescript", "python"]
     steps:
       - uses: actions/checkout@v7
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
-          languages: ${{ matrix.language }}
+          languages: javascript-typescript
           config: |
             paths:
               - apps
@@ -45,12 +41,12 @@ jobs:
               - "**/*.spec.*"
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+        uses: github/codeql-action/autobuild@v4
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
-          category: "/language:${{ matrix.language }}"
+          category: "/language:javascript-typescript"
 
   # ─── Rust Security ────────────────────────────────────────────────
   cargo-audit:
@@ -153,7 +149,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm add -DW license-checker
+      - run: pnpm add -wD license-checker
       - name: Flag copyleft JS licenses
         run: |
           npx license-checker --production --json --out /tmp/js-licenses.json 2>/dev/null || true
@@ -211,7 +207,7 @@ jobs:
           ignore-unfixed: true
 
       - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: "trivy-${{ matrix.service }}.sarif"

@@ -305,6 +305,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           path: artifacts
+          pattern: cli-*,desktop-*,wasm-*,website*
 
       - name: List artifacts
         run: find artifacts -type f | head -50
@@ -317,7 +318,6 @@ jobs:
           files: |
             artifacts/cli-*/**
             artifacts/desktop-*/**
-            artifacts/wasm-plugin/**
-            artifacts/website/**
+            artifacts/wasm-*/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
