@@ -2,14 +2,6 @@ name: Release
 
 # Builds ALL ReqForge artifacts and publishes a GitHub Release.
 # Triggers on version tags (v*.*.*).
-#
-# Artifacts produced:
-#   1. CLI binary (4 targets)
-#   2. Desktop app via Tauri (3 platforms)
-#   3. WASM plugin
-#   4. Docker images (3 services)
-#   5. Static website
-#   6. crates.io publish (reqforge-core)
 
 on:
   push:
@@ -160,14 +152,24 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build Tauri app
-        working-directory: apps/desktop
         run: pnpm tauri build ${{ matrix.args }}
+        working-directory: apps/desktop
+
+      # Tauri uses workspace root target/ — bundles are at target/<triple>/release/bundle/
+      - name: List bundle output
+        shell: bash
+        run: |
+          echo "=== Bundle directory ==="
+          find target/${{ matrix.target }}/release/bundle -type f 2>/dev/null || echo "No bundle dir found"
+          echo "=== src-tauri target ==="
+          find apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle -type f 2>/dev/null || echo "No src-tauri bundle dir"
 
       - name: Upload desktop artifacts
         uses: actions/upload-artifact@v7
         with:
           name: desktop-${{ matrix.target }}
           path: |
+            target/${{ matrix.target }}/release/bundle/**/*
             apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/**/*
           if-no-files-found: warn
           retention-days: 5
@@ -275,7 +277,7 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   # ─── 6. Publish to crates.io ───────────────────────────────────────
   publish-crate:
@@ -305,7 +307,6 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           path: artifacts
-          pattern: cli-*,desktop-*,wasm-*,website*
 
       - name: List artifacts
         run: find artifacts -type f | head -50
