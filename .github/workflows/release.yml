@@ -67,23 +67,20 @@ jobs:
       - name: Cache cargo registry & target
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: "apps/cli -> target"
           shared-key: ${{ matrix.target }}
 
       - name: Build CLI
         shell: bash
-        working-directory: apps/cli
         run: |
           if [ "${{ matrix.cross }}" = "true" ]; then
-            cross build --release --target ${{ matrix.target }} --bin reqforge
+            cross build --release --target ${{ matrix.target }} --manifest-path apps/cli/Cargo.toml --bin reqforge
           else
-            cargo build --release --target ${{ matrix.target }} --bin reqforge
+            cargo build --release --target ${{ matrix.target }} --manifest-path apps/cli/Cargo.toml --bin reqforge
           fi
 
       - name: Package artifact (Unix)
         if: matrix.os != 'windows-latest'
         shell: bash
-        working-directory: apps/cli
         run: |
           BIN_DIR="target/${{ matrix.target }}/release"
           BIN="${{ matrix.binary }}"
@@ -97,17 +94,16 @@ jobs:
           (command -v strip >/dev/null && strip "staging/$BIN") || true
           case "${{ matrix.archive }}" in
             tar.xz)
-              tar -cJf "../target/${{ matrix.target }}.tar.xz" -C staging .
+              tar -cJf "target/${{ matrix.target }}.tar.xz" -C staging .
               ;;
             tar.gz)
-              tar -czf "../target/${{ matrix.target }}.tar.gz" -C staging .
+              tar -czf "target/${{ matrix.target }}.tar.gz" -C staging .
               ;;
           esac
 
       - name: Package artifact (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
-        working-directory: apps/cli
         run: |
           $BIN_DIR = "target/${{ matrix.target }}/release"
           $BIN = "${{ matrix.binary }}"
@@ -117,13 +113,13 @@ jobs:
           }
           New-Item -ItemType Directory -Path "staging" | Out-Null
           Copy-Item "$BIN_DIR/$BIN" "staging/"
-          Compress-Archive -Path "staging/*" -DestinationPath "../target/${{ matrix.target }}.zip" -Force
+          Compress-Archive -Path "staging/*" -DestinationPath "target/${{ matrix.target }}.zip" -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: reqforge-cli-${{ matrix.target }}
-          path: apps/cli/target/${{ matrix.target }}.${{ matrix.archive }}
+          path: target/${{ matrix.target }}.${{ matrix.archive }}
           if-no-files-found: error
 
   release:
