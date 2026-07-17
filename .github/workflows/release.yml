@@ -25,6 +25,8 @@ on:
 permissions:
   contents: write
   packages: write
+  pages: write
+  id-token: write
 
 env:
   CARGO_TERM_COLOR: always
@@ -259,20 +261,24 @@ jobs:
         working-directory: web
         run: pnpm build
 
-      - name: Upload site
-        uses: actions/upload-artifact@v7
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: website
           path: web/dist/
-          if-no-files-found: error
 
+  # ─── 5b. Deploy website ────────────────────────────────────────────
+  deploy-website:
+    name: Deploy website
+    needs: website
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: web/dist
-          destination_dir: site
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   # ─── 6. Publish to crates.io ───────────────────────────────────────
   publish-crate:
