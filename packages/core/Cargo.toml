@@ -13,7 +13,7 @@ async-trait = "0.1"
 futures = "0.3"
 
 # HTTP client
-reqwest = { version = "0.11", features = ["json", "cookies", "gzip", "brotli", "stream"] }
+reqwest = { version = "0.11", default-features = false, features = ["json", "cookies", "gzip", "brotli", "stream", "rustls-tls"] }
 
 # Serialization
 serde = { version = "1.0", features = ["derive"] }

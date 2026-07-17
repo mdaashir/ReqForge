@@ -71,6 +71,7 @@ jobs:
           shared-key: ${{ matrix.target }}
 
       - name: Build CLI
+        shell: bash
         working-directory: apps/cli
         run: |
           if [ "${{ matrix.cross }}" = "true" ]; then
@@ -116,7 +117,6 @@ jobs:
           }
           New-Item -ItemType Directory -Path "staging" | Out-Null
           Copy-Item "$BIN_DIR/$BIN" "staging/"
-          Compress-Archive -Path "staging/*" -DestinationPath "../target/${{ matrix.target }}.zip"
           Compress-Archive -Path "staging/*" -DestinationPath "../target/${{ matrix.target }}.zip" -Force
 
       - name: Upload artifact
