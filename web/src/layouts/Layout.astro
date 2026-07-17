@@ -7,6 +7,7 @@ const {
   title = 'ReqForge — Ultimate API Development Platform',
   description = 'A modern, blazing-fast API client for HTTP, GraphQL, WebSocket, and more. Built with Rust, powered by Tauri.',
 } = Astro.props
+const base = import.meta.env.BASE_URL
 ---
 <!doctype html>
 <html lang="en">
@@ -17,7 +18,7 @@ const {
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/png" href={`${base}favicon.png`} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -101,20 +102,20 @@ const {
   </head>
   <body>
     <nav>
-      <a href="/" class="logo">Req<span>Forge</span></a>
+      <a href={`${base}`} class="logo">Req<span>Forge</span></a>
       <div class="nav-links">
-        <a href="/#features">Features</a>
-        <a href="/docs">Docs</a>
-        <a href="/docs/getting-started">Getting Started</a>
+        <a href={`${base}#features`}>Features</a>
+        <a href={`${base}docs`}>Docs</a>
+        <a href={`${base}docs/getting-started`}>Getting Started</a>
         <a href="https://github.com/reqforge/reqforge">GitHub</a>
-        <a href="/docs" class="cta">Download</a>
+        <a href={`${base}docs`} class="cta">Download</a>
       </div>
     </nav>
     <main><slot /></main>
     <footer>
       <div class="links">
-        <a href="/">Home</a>
-        <a href="/docs">Docs</a>
+        <a href={`${base}`}>Home</a>
+        <a href={`${base}docs`}>Docs</a>
         <a href="https://github.com/reqforge/reqforge">GitHub</a>
         <a href="https://discord.gg/reqforge">Discord</a>
       </div>

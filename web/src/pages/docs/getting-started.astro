@@ -1,23 +1,24 @@
 ---
 import Layout from '../../layouts/Layout.astro'
+const base = import.meta.env.BASE_URL
 ---
 <Layout title="ReqForge — Getting Started">
   <div class="container" style="display: flex; gap: 3rem;">
     <nav class="doc-sidebar">
       <h4>Getting Started</h4>
-      <a href="/docs/getting-started" class="active">Installation & Quickstart</a>
-      <a href="/docs/collections">Collections & Requests</a>
-      <a href="/docs/environments">Environments & Variables</a>
-      <a href="/docs/auth">Authentication</a>
+      <a href={`${base}docs/getting-started`} class="active">Installation & Quickstart</a>
+      <a href={`${base}docs/collections`}>Collections & Requests</a>
+      <a href={`${base}docs/environments`}>Environments & Variables</a>
+      <a href={`${base}docs/auth`}>Authentication</a>
       <h4>Guides</h4>
-      <a href="/docs/testing">Testing & Scripts</a>
-      <a href="/docs/import-export">Importing & Exporting</a>
-      <a href="/docs/plugins">Plugin Development</a>
-      <a href="/docs/sync">Cloud Sync</a>
+      <a href={`${base}docs/testing`}>Testing & Scripts</a>
+      <a href={`${base}docs/import-export`}>Importing & Exporting</a>
+      <a href={`${base}docs/plugins`}>Plugin Development</a>
+      <a href={`${base}docs/sync`}>Cloud Sync</a>
       <h4>Reference</h4>
-      <a href="/docs/cli">CLI Reference</a>
-      <a href="/docs/keyboard">Keyboard Shortcuts</a>
-      <a href="/docs/troubleshooting">Troubleshooting</a>
+      <a href={`${base}docs/cli`}>CLI Reference</a>
+      <a href={`${base}docs/keyboard`}>Keyboard Shortcuts</a>
+      <a href={`${base}docs/troubleshooting`}>Troubleshooting</a>
     </nav>
     <article class="doc-content">
       <h1>Installation & Quickstart</h1>
