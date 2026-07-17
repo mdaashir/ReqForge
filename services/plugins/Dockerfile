@@ -1,4 +1,4 @@
-FROM rust:1.88-slim AS builder
+FROM rust:slim AS builder
 WORKDIR /app
 
 # Copy workspace root + lockfile
