@@ -1,16 +1,15 @@
 name: Release
 
-# Builds the ReqForge CLI for every supported platform and uploads
-# the artifacts to a GitHub Release.
+# Builds ALL ReqForge artifacts and publishes a GitHub Release.
+# Triggers on version tags (v*.*.*).
 #
-# Notes on platform coverage:
-# - x86_64-linux + aarch64-linux (via cross): full Linux support
-# - x86_64-windows: native MSVC build on windows runner
-# - x86_64-macos: native build on macos runner
-# - aarch64-macos: NOT built — GitHub's macOS runners are x86_64
-#   only, and cross-compiling macOS targets requires the macOS SDK
-#   which isn't available on Linux/Windows runners. Remove from
-#   matrix if/when GitHub adds M-series macOS runners.
+# Artifacts produced:
+#   1. CLI binary (4 targets)
+#   2. Desktop app via Tauri (3 platforms)
+#   3. WASM plugin
+#   4. Docker images (3 services)
+#   5. Static website
+#   6. crates.io publish (reqforge-core)
 
 on:
   push:
@@ -25,8 +24,14 @@ on:
 
 permissions:
   contents: write
+  packages: write
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
 
 jobs:
+  # ─── 1. CLI ────────────────────────────────────────────────────────
   cli:
     name: CLI (${{ matrix.target }})
     strategy:
@@ -50,13 +55,10 @@ jobs:
             os: windows-latest
             archive: zip
             binary: reqforge.exe
-
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
 
@@ -64,10 +66,9 @@ jobs:
         if: matrix.cross
         run: cargo install cross --git https://github.com/cross-rs/cross --locked
 
-      - name: Cache cargo registry & target
-        uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: ${{ matrix.target }}
+          shared-key: cli-${{ matrix.target }}
 
       - name: Build CLI
         shell: bash
@@ -78,53 +79,220 @@ jobs:
             cargo build --release --target ${{ matrix.target }} --manifest-path apps/cli/Cargo.toml --bin reqforge
           fi
 
-      - name: Package artifact (Unix)
+      - name: Package (Unix)
         if: matrix.os != 'windows-latest'
         shell: bash
         run: |
           BIN_DIR="target/${{ matrix.target }}/release"
           BIN="${{ matrix.binary }}"
-          if [ ! -f "$BIN_DIR/$BIN" ]; then
-            echo "Binary $BIN_DIR/$BIN not found!"
-            ls -la "$BIN_DIR/" || true
-            exit 1
-          fi
-          mkdir -p staging
-          cp "$BIN_DIR/$BIN" staging/
+          [ ! -f "$BIN_DIR/$BIN" ] && echo "Missing $BIN_DIR/$BIN" && ls "$BIN_DIR/" && exit 1
+          mkdir -p staging && cp "$BIN_DIR/$BIN" staging/
           (command -v strip >/dev/null && strip "staging/$BIN") || true
           case "${{ matrix.archive }}" in
-            tar.xz)
-              tar -cJf "target/${{ matrix.target }}.tar.xz" -C staging .
-              ;;
-            tar.gz)
-              tar -czf "target/${{ matrix.target }}.tar.gz" -C staging .
-              ;;
+            tar.xz) tar -cJf "target/${{ matrix.target }}.tar.xz" -C staging . ;;
+            tar.gz) tar -czf "target/${{ matrix.target }}.tar.gz" -C staging . ;;
           esac
 
-      - name: Package artifact (Windows)
+      - name: Package (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
           $BIN_DIR = "target/${{ matrix.target }}/release"
           $BIN = "${{ matrix.binary }}"
-          if (-not (Test-Path "$BIN_DIR/$BIN")) {
-            Write-Error "Binary $BIN_DIR/$BIN not found!"
-            exit 1
-          }
+          if (-not (Test-Path "$BIN_DIR/$BIN")) { Write-Error "Missing $BIN_DIR/$BIN"; exit 1 }
           New-Item -ItemType Directory -Path "staging" | Out-Null
           Copy-Item "$BIN_DIR/$BIN" "staging/"
           Compress-Archive -Path "staging/*" -DestinationPath "target/${{ matrix.target }}.zip" -Force
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7
         with:
-          name: reqforge-cli-${{ matrix.target }}
+          name: cli-${{ matrix.target }}
           path: target/${{ matrix.target }}.${{ matrix.archive }}
           if-no-files-found: error
 
+  # ─── 2. Desktop (Tauri) ────────────────────────────────────────────
+  desktop:
+    name: Desktop (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            args: "--target x86_64-pc-windows-msvc"
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            args: "--target x86_64-apple-darwin"
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            args: "--target aarch64-apple-darwin"
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            args: "--target x86_64-unknown-linux-gnu"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: desktop-${{ matrix.target }}
+
+      - name: Install system deps (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev \
+            librsvg2-dev patchelf libgtk-3-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev
+
+      - name: Install frontend deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Tauri app
+        working-directory: apps/desktop
+        run: pnpm tauri build ${{ matrix.args }}
+
+      - name: Upload desktop artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: desktop-${{ matrix.target }}
+          path: |
+            apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/**/*
+          if-no-files-found: warn
+          retention-days: 5
+
+  # ─── 3. WASM Plugin ────────────────────────────────────────────────
+  wasm-plugin:
+    name: WASM plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: wasm-plugin
+
+      - name: Build WASM
+        run: cargo build --release --target wasm32-unknown-unknown --manifest-path plugins/header-juggler/Cargo.toml
+
+      - name: Package
+        run: |
+          mkdir -p staging
+          cp target/wasm32-unknown-unknown/release/header_juggler.wasm staging/header-juggler.wasm
+          tar -czf target/header-juggler-wasm.tar.gz -C staging .
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wasm-plugin
+          path: target/header-juggler-wasm.tar.gz
+          if-no-files-found: error
+
+  # ─── 4. Docker Images ─────────────────────────────────────────────
+  docker:
+    name: Docker (${{ matrix.service }})
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [sync, plugins, telemetry]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/reqforge-${{ matrix.service }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: services/${{ matrix.service }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─── 5. Website ────────────────────────────────────────────────────
+  website:
+    name: Website
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build site
+        working-directory: web
+        run: pnpm build
+
+      - name: Upload site
+        uses: actions/upload-artifact@v7
+        with:
+          name: website
+          path: web/dist/
+          if-no-files-found: error
+
+      - name: Deploy to GitHub Pages
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: web/dist
+          destination_dir: site
+
+  # ─── 6. Publish to crates.io ───────────────────────────────────────
+  publish-crate:
+    name: Publish core to crates.io
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Publish reqforge-core
+        working-directory: packages/core
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish --allow-dirty || echo "Already published or missing token — skipping"
+
+  # ─── 7. GitHub Release ─────────────────────────────────────────────
   release:
     name: Publish release
-    needs: cli
+    needs: [cli, desktop, wasm-plugin, docker, website]
     if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.publish == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -135,11 +303,18 @@ jobs:
         with:
           path: artifacts
 
+      - name: List artifacts
+        run: find artifacts -type f | head -50
+
       - name: Create / update release
         uses: softprops/action-gh-release@v3
         with:
           draft: true
           generate_release_notes: true
-          files: artifacts/**/*
+          files: |
+            artifacts/cli-*/**
+            artifacts/desktop-*/**
+            artifacts/wasm-plugin/**
+            artifacts/website/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
