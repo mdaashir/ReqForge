@@ -122,7 +122,7 @@ tempfile = "3.27"
 proptest = "1.11"
 
 [dev-dependencies.criterion]
-version = "0.5"
+version = "0.8"
 features = ["html_reports"]
 
 [[bench]]
