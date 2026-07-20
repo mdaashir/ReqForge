@@ -65,7 +65,7 @@ yrs = { version = "0.27", optional = true }
 axum = { version = "0.7", optional = true }
 
 # WebSocket client (replaces the MVP stub with real connections)
-tokio-tungstenite = { version = "0.21", optional = true }
+tokio-tungstenite = { version = "0.30", optional = true }
 
 # Full gRPC via HTTP/2 (reqwest-based, no tonic dependency)
 tokio-stream = { version = "0.1", optional = true }
