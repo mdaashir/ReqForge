@@ -97,7 +97,7 @@ quick-xml = { version = "0.36", features = ["serialize"] }
 notify = { version = "8.2", optional = true }
 
 # Git integration (auto-commit, sync)
-git2 = { version = "0.20", optional = true }
+git2 = { version = "0.21", optional = true }
 
 [lints]
 rust.unexpected_cfgs = { level = "allow", check-cfg = ['cfg(http3)'] }
