@@ -62,7 +62,7 @@ toml = "0.8"
 yrs = { version = "0.27", optional = true }
 
 # Mock server (light HTTP server for testing)
-axum = { version = "0.7", optional = true }
+axum = { version = "0.8", optional = true }
 
 # WebSocket client (replaces the MVP stub with real connections)
 tokio-tungstenite = { version = "0.21", optional = true }
